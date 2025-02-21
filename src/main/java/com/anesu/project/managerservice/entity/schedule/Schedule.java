@@ -1,7 +1,9 @@
 package com.anesu.project.managerservice.entity.schedule;
 
+import com.anesu.project.managerservice.entity.ScheduleStatus;
 import com.anesu.project.managerservice.entity.manager.Manager;
 import com.anesu.project.managerservice.entity.shift.ShiftEntry;
+import com.anesu.project.managerservice.entity.vacation.VacationRequest;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,7 +15,6 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-
 public class Schedule {
 
   @Id
@@ -25,10 +26,15 @@ public class Schedule {
   private LocalDateTime endDate;
   private Long totalWorkingHours;
 
-  List<ShiftEntry> shifts;
+  private ScheduleStatus status;
+
+  @ElementCollection List<ShiftEntry> shifts;
 
   @ManyToOne
   @JoinColumn(name = "approved_by_manager_id")
   private Manager approvedByManager;
 
+  @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  @JoinColumn(name = "schedule_id")
+  private List<VacationRequest> vacations;
 }

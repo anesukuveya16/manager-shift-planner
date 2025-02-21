@@ -3,7 +3,6 @@ package com.anesu.project.managerservice.entity.shift;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import java.time.LocalDateTime;
-
 import lombok.*;
 
 @Entity

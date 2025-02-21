@@ -21,11 +21,10 @@ public interface ScheduleService {
   /**
    * Updates a specific employee's schedule based on the manager's decision.
    *
-   * @param employeeId the ID of the employee whose schedule needs to be updated
    * @param updatedSchedule the updated schedule information
    * @return the updated {@link Schedule}
    */
-  Schedule updateEmployeeSchedule(Long employeeId, Schedule updatedSchedule);
+  Schedule updateEmployeeSchedule(Long scheduleId, Schedule updatedSchedule);
 
   /**
    * Adds a new shift to an employee's schedule after approving a {@link ShiftRequest}.
@@ -51,8 +50,8 @@ public interface ScheduleService {
    * @param endDate the end of the {@link LocalDateTime} range
    * @return a list of {@link Schedule}s for all employees within the date range
    */
-  Optional<List<Schedule>> getAllSchedulesInDateRange(
-      LocalDateTime startDate, LocalDateTime endDate);
+  Optional<List<Schedule>> getAllEmployeeSchedulesWithinGivenDateRange(
+      Long scheduleId, LocalDateTime startDate, LocalDateTime endDate);
 
   /**
    * Deletes a specific employee's schedule by ID (only if applicable to manager's permissions).
