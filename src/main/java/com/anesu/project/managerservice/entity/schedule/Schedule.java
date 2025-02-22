@@ -37,4 +37,8 @@ public class Schedule {
   @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   @JoinColumn(name = "schedule_id")
   private List<VacationRequest> vacations;
+
+  // TODO: implement the getShiftsInRange and getVacationsInRange public methods to allow for
+  // encapsulation.
+
 }

@@ -9,4 +9,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
   Optional<List<Schedule>> findByAllEmployeeIdAndGivenDateRange(
       Long scheduleId, LocalDateTime startDate, LocalDateTime endDate);
+
+  Optional<Schedule> findByEmployeeIdAndCalendarWeek(
+      Long employeeId,
+      LocalDateTime startOfShiftCalendarWeek,
+      LocalDateTime endOfShiftCalendarWeek);
 }
