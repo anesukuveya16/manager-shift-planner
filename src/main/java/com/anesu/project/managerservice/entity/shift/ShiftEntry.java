@@ -19,4 +19,5 @@ public class ShiftEntry {
   private Long workingHours;
 
   // insert the builder to add approved shift requests into the schedule
+
 }

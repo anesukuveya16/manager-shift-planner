@@ -29,7 +29,8 @@ public class ScheduleServiceImpl implements ScheduleService {
   }
 
   @Override
-  public Schedule approveOrRejectSchedule(Long scheduleId, ScheduleStatus status) {
+  public Schedule approveOrRejectScheduleUpdate(
+      Long scheduleId, ScheduleStatus status, String rejectionReason) {
     Schedule schedule =
         scheduleRepository
             .findById(scheduleId)
@@ -38,10 +39,10 @@ public class ScheduleServiceImpl implements ScheduleService {
     try {
       scheduleValidator.validateSchedule(schedule);
       schedule.setStatus(ScheduleStatus.APPROVED);
-      System.out.println("Schedule approved!");
+      System.out.println("Schedule update approved!");
     } catch (InvalidScheduleException exception) {
       schedule.setStatus(ScheduleStatus.REJECTED);
-      System.out.println("Schedule rejected due to validation failure.");
+      System.out.println("Schedule update has been rejected because: " + rejectionReason);
     }
 
     return scheduleRepository.save(schedule);
@@ -73,17 +74,16 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     // Checking if there is an existing Schedule for that calendar week: (extract method)
-    LocalDateTime startOfShiftCalendarWeek = approvedShiftRequest.getShiftDate().with(DayOfWeek.MONDAY);
-    LocalDateTime endOfShiftCalendarWeek = approvedShiftRequest.getShiftDate().with(DayOfWeek.SUNDAY);
+    LocalDateTime startOfShiftCalendarWeek =
+        approvedShiftRequest.getShiftDate().with(DayOfWeek.MONDAY);
+    LocalDateTime endOfShiftCalendarWeek =
+        approvedShiftRequest.getShiftDate().with(DayOfWeek.SUNDAY);
 
     Optional<Schedule> scheduleInApprovedShiftCalendarWeek =
-            scheduleRepository.findByEmployeeIdAndCalendarWeek(
-                    employeeId, startOfShiftCalendarWeek, endOfShiftCalendarWeek);
+        scheduleRepository.findByEmployeeIdAndCalendarWeek(
+            employeeId, startOfShiftCalendarWeek, endOfShiftCalendarWeek);
 
     // Add the new shift to schedule or create a new one (extract method)
-
-
-
 
     return null;
   }

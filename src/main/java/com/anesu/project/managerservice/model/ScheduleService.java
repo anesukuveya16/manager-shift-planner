@@ -16,7 +16,8 @@ public interface ScheduleService {
    * @param status the approval status (approved or rejected)
    * @return the updated {@link Schedule} after approval or rejection
    */
-  Schedule approveOrRejectSchedule(Long scheduleId, ScheduleStatus status);
+  Schedule approveOrRejectScheduleUpdate(
+      Long scheduleId, ScheduleStatus status, String rejectionReason);
 
   /**
    * Updates a specific employee's schedule based on the manager's decision.

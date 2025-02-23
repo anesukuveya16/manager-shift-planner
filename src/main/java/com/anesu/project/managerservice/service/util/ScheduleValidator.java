@@ -22,10 +22,10 @@ public class ScheduleValidator {
 
     try {
       validateSchedule(schedule);
-      System.out.println("Schedule approved!");
+      System.out.println("Schedule update approved!");
       return true;
     } catch (InvalidScheduleException e) {
-      System.out.println("Schedule declined due to validation failure: " + e.getMessage());
+      System.out.println("Schedule has been declined due to validation failure: " + e.getMessage());
       return false;
     }
   }
