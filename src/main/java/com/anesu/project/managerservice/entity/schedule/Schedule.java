@@ -5,6 +5,7 @@ import com.anesu.project.managerservice.entity.manager.Manager;
 import com.anesu.project.managerservice.entity.shift.ShiftEntry;
 import com.anesu.project.managerservice.entity.vacation.VacationRequest;
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.*;
@@ -48,6 +49,16 @@ public class Schedule {
                 !shift.getShiftDate().isBefore(rangeStart)
                     && !shift.getShiftDate().isAfter(rangeEnd))
         .map(ShiftEntry::getShiftDate)
+        .toList();
+  }
+
+  public List<LocalDate> getVacationsInRange(LocalDate rangeStart, LocalDate rangeEnd) {
+    return vacations.stream()
+        .filter(
+            vacation ->
+                vacation.getStartDate().isBefore(rangeEnd.plusDays(1))
+                    && vacation.getEndDate().isAfter(rangeStart.minusDays(1)))
+        .flatMap(vacation -> vacation.getStartDate().datesUntil(vacation.getEndDate().plusDays(1)))
         .toList();
   }
 }
