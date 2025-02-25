@@ -33,6 +33,9 @@ public class ShiftRequestServiceImpl implements ShiftRequestService {
 
     ShiftRequest shiftRequest =
         getShiftRequestByIdAndStatus(shiftRequestId, ShiftRequestStatus.PENDING);
+
+    shiftRequestValidator.validateShiftRequest(shiftRequest, shiftRequestRepository);
+
     shiftRequest.setStatus(ShiftRequestStatus.APPROVED);
     ShiftRequest approvedShiftRequest = shiftRequestRepository.save(shiftRequest);
 
@@ -47,6 +50,9 @@ public class ShiftRequestServiceImpl implements ShiftRequestService {
 
     ShiftRequest shiftRequest =
         getShiftRequestByIdAndStatus(shiftRequestId, ShiftRequestStatus.REJECTED);
+
+    shiftRequestValidator.validateShiftRequest(shiftRequest, shiftRequestRepository);
+
     shiftRequest.setStatus(ShiftRequestStatus.REJECTED);
     shiftRequest.setRejectionReason(shiftRequest.getRejectionReason());
 

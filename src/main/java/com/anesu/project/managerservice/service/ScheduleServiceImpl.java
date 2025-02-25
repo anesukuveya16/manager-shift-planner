@@ -4,6 +4,7 @@ import com.anesu.project.managerservice.entity.ScheduleStatus;
 import com.anesu.project.managerservice.entity.schedule.Schedule;
 import com.anesu.project.managerservice.entity.shift.ShiftRequest;
 import com.anesu.project.managerservice.entity.shift.ShiftRequestStatus;
+import com.anesu.project.managerservice.entity.vacation.VacationRequest;
 import com.anesu.project.managerservice.model.ScheduleService;
 import com.anesu.project.managerservice.model.repository.ScheduleRepository;
 import com.anesu.project.managerservice.service.exception.InvalidScheduleException;
@@ -97,6 +98,12 @@ public class ScheduleServiceImpl implements ScheduleService {
   public Optional<List<Schedule>> getAllEmployeeSchedulesWithinGivenDateRange(
       Long scheduleId, LocalDateTime startDate, LocalDateTime endDate) {
     return scheduleRepository.findByAllEmployeeIdAndGivenDateRange(scheduleId, startDate, endDate);
+  }
+
+  @Override
+  public Schedule addApprovedVacationRequestToSchedule(
+      Long employeeId, VacationRequest approvedVacationRequest) {
+    return null;
   }
 
   @Override

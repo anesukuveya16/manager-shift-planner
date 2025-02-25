@@ -19,7 +19,8 @@ public interface VacationRequestService {
    * @param status The new status of the vacation request.
    * @return The updated {@link VacationRequest} after approval.
    */
-  VacationRequest approveVacationRequest(Long vacationRequestId, VacationRequestStatus status);
+  VacationRequest approveVacationRequest(Long vacationRequestId, VacationRequestStatus status)
+      throws VacationRequestNotFoundException;
 
   /**
    * Declines a vacation request with a given reason.
@@ -28,7 +29,8 @@ public interface VacationRequestService {
    * @param rejectionReason The reason for rejecting the request.
    * @return The updated {@link VacationRequest} after being declined.
    */
-  VacationRequest declineVacationRequest(Long vacationRequestId, String rejectionReason);
+  VacationRequest declineVacationRequest(Long vacationRequestId, String rejectionReason)
+      throws VacationRequestNotFoundException;
 
   /**
    * Retrieves a list of vacation requests for a specific employee.
@@ -60,6 +62,13 @@ public interface VacationRequestService {
   List<VacationRequest> getTeamCalendar(
       Long officeLocationId, LocalDateTime startDate, LocalDateTime endDate);
 
+  /**
+   * Retrieves the vacation schedule for an employee by the id and status of the vacation request.
+   *
+   * @param vacationRequestId The ID of the vacation request.
+   * @param status The current status of the requested vacation.
+   * @return A list of {@link VacationRequest} objects representing the team's calendar.
+   */
   VacationRequest getVacationRequestByIdAndStatus(
       Long vacationRequestId, VacationRequestStatus status) throws VacationRequestNotFoundException;
 }

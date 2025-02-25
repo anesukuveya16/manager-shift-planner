@@ -16,5 +16,11 @@ public class VacationRequestValidator {
       "You can only withdraw your own requests.";
 
   public void validateVacationRequest(
-      VacationRequest vacationRequest, VacationRequestRepository repository) {}
+      VacationRequest vacationRequest, VacationRequestRepository repository) {
+
+    VacationRequest isOverlappingWithExistingRequests;
+  }
+
+
+
 }

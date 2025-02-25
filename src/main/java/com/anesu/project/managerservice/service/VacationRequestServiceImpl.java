@@ -29,13 +29,34 @@ public class VacationRequestServiceImpl implements VacationRequestService {
 
   @Override
   public VacationRequest approveVacationRequest(
-      Long vacationRequestId, VacationRequestStatus status) {
-    return null;
+      Long vacationRequestId, VacationRequestStatus status)
+      throws VacationRequestNotFoundException {
+
+    VacationRequest vacationRequest =
+        getVacationRequestByIdAndStatus(vacationRequestId, VacationRequestStatus.PENDING);
+    vacationRequestValidator.validateVacationRequest(vacationRequest, vacationRequestRepository);
+
+    vacationRequest.setStatus(VacationRequestStatus.APPROVED);
+    VacationRequest approvedVacationRequest = vacationRequestRepository.save(vacationRequest);
+
+    scheduleService.addApprovedVacationRequestToSchedule(
+        vacationRequest.getEmployeeId(), approvedVacationRequest);
+
+    return vacationRequestRepository.save(approvedVacationRequest);
   }
 
   @Override
-  public VacationRequest declineVacationRequest(Long vacationRequestId, String rejectionReason) {
-    return null;
+  public VacationRequest declineVacationRequest(Long vacationRequestId, String rejectionReason)
+      throws VacationRequestNotFoundException {
+
+    VacationRequest vacationRequest =
+        getVacationRequestByIdAndStatus(vacationRequestId, VacationRequestStatus.PENDING);
+    vacationRequestValidator.validateVacationRequest(vacationRequest, vacationRequestRepository);
+
+    vacationRequest.setStatus(VacationRequestStatus.REJECTED);
+    vacationRequest.setRejectionReason(rejectionReason);
+
+    return vacationRequestRepository.save(vacationRequest);
   }
 
   @Override

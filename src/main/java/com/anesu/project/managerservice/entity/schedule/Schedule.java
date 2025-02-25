@@ -39,9 +39,6 @@ public class Schedule {
   @JoinColumn(name = "schedule_id")
   private List<VacationRequest> vacations;
 
-  // TODO: implement the getShiftsInRange and getVacationsInRange public methods to allow for
-  // encapsulation.
-
   public List<LocalDateTime> getShiftsInRange(LocalDateTime rangeStart, LocalDateTime rangeEnd) {
     return shifts.stream()
         .filter(

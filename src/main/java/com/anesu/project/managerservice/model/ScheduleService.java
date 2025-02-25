@@ -3,6 +3,7 @@ package com.anesu.project.managerservice.model;
 import com.anesu.project.managerservice.entity.ScheduleStatus;
 import com.anesu.project.managerservice.entity.schedule.Schedule;
 import com.anesu.project.managerservice.entity.shift.ShiftRequest;
+import com.anesu.project.managerservice.entity.vacation.VacationRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +54,17 @@ public interface ScheduleService {
    */
   Optional<List<Schedule>> getAllEmployeeSchedulesWithinGivenDateRange(
       Long scheduleId, LocalDateTime startDate, LocalDateTime endDate);
+
+  /**
+   * Adds approved vacation requests to an employee's schedule after approving a {@link
+   * VacationRequest}.
+   *
+   * @param employeeId the ID of the employee to update
+   * @param approvedVacationRequest the approved {@link VacationRequest}
+   * @return the updated {@link Schedule}
+   */
+  Schedule addApprovedVacationRequestToSchedule(
+      Long employeeId, VacationRequest approvedVacationRequest);
 
   /**
    * Deletes a specific employee's schedule by ID (only if applicable to manager's permissions).
