@@ -2,7 +2,7 @@ package com.anesu.project.managerservice.entity.vacation;
 
 import com.anesu.project.managerservice.entity.manager.Manager;
 import jakarta.persistence.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.*;
 
 @Entity
@@ -22,8 +22,8 @@ public class VacationRequest {
   private Long employeeId;
 
   private Long officeLocationId;
-  private LocalDate startDate;
-  private LocalDate endDate;
+  private LocalDateTime startDate;
+  private LocalDateTime endDate;
 
   @Enumerated(EnumType.STRING)
   private VacationRequestStatus status;

@@ -1,4 +1,4 @@
-package com.anesu.project.managerservice.service.util;
+package com.anesu.project.managerservice.service.exception;
 
 public class VacationRequestNotFoundException extends RuntimeException {
 

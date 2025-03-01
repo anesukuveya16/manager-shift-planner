@@ -2,7 +2,7 @@ package com.anesu.project.managerservice.model;
 
 import com.anesu.project.managerservice.entity.vacation.VacationRequest;
 import com.anesu.project.managerservice.entity.vacation.VacationRequestStatus;
-import com.anesu.project.managerservice.service.util.VacationRequestNotFoundException;
+import com.anesu.project.managerservice.service.exception.VacationRequestNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
 

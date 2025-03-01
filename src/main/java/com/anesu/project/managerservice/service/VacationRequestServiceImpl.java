@@ -5,7 +5,7 @@ import com.anesu.project.managerservice.entity.vacation.VacationRequestStatus;
 import com.anesu.project.managerservice.model.ScheduleService;
 import com.anesu.project.managerservice.model.VacationRequestService;
 import com.anesu.project.managerservice.model.repository.VacationRequestRepository;
-import com.anesu.project.managerservice.service.util.VacationRequestNotFoundException;
+import com.anesu.project.managerservice.service.exception.VacationRequestNotFoundException;
 import com.anesu.project.managerservice.service.util.VacationRequestValidator;
 import java.time.LocalDateTime;
 import java.util.List;
