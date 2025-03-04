@@ -9,8 +9,8 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class VacationRequest {
 
   @Id
@@ -29,9 +29,9 @@ public class VacationRequest {
   private VacationRequestStatus status;
 
   private String rejectionReason;
-  private Long approvedBy; // manager ID who approved the request.
 
   @ManyToOne
   @JoinColumn(name = "approved_by_manager_id")
   private Manager approvedByManager;
+
 }

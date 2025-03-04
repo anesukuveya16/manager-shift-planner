@@ -15,21 +15,6 @@ public class ScheduleValidator {
   private static final int MAX_WORKING_HOURS_PER_SHIFT = 8;
   private static final int MAX_WORKING_HOURS_PER_WEEK = 40;
 
-  public boolean validateAndApproveSchedule(Long managerId, Long employeeId, Schedule schedule) {
-    if (!employeeId.equals(schedule.getEmployeeId())) {
-      throw new InvalidScheduleException("The schedule does not belong to the specified employee.");
-    }
-
-    try {
-      validateSchedule(schedule);
-      System.out.println("Schedule update approved!");
-      return true;
-    } catch (InvalidScheduleException e) {
-      System.out.println("Schedule has been declined due to validation failure: " + e.getMessage());
-      return false;
-    }
-  }
-
   public void validateSchedule(Schedule schedule) {
     validateDates(schedule);
     validateWorkingHours(schedule);

@@ -1,6 +1,5 @@
 package com.anesu.project.managerservice.model;
 
-import com.anesu.project.managerservice.entity.ScheduleStatus;
 import com.anesu.project.managerservice.entity.schedule.Schedule;
 import com.anesu.project.managerservice.entity.shift.ShiftRequest;
 import com.anesu.project.managerservice.entity.vacation.VacationRequest;
@@ -9,16 +8,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ScheduleService {
-
-  /**
-   * Approves or rejects a schedule update requested by an employee.
-   *
-   * @param scheduleId the ID of the {@link Schedule} to approve or reject
-   * @param status the approval status (approved or rejected)
-   * @return the updated {@link Schedule} after approval or rejection
-   */
-  Schedule approveOrRejectScheduleUpdate(
-      Long scheduleId, ScheduleStatus status, String rejectionReason);
 
   /**
    * Updates a specific employee's schedule based on the manager's decision.

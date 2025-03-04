@@ -16,8 +16,6 @@ public class VacationRequestValidator {
   private static final int MAX_VACATION_DAYS_EACH_YEAR = 30;
   private static final String OVERLAPPING_VACATION_REQUEST_ERROR =
       "Request could not be fulfilled because there is already an approved vacation request for this period for employee: ";
-  private static final String INVALID_VACATION_STATUS_ERROR =
-      "Only pending requests can be withdrawn.";
 
   public void validateVacationRequest(
       VacationRequest vacationRequest, VacationRequestRepository repository) {
@@ -29,7 +27,7 @@ public class VacationRequestValidator {
       VacationRequest vacationRequest, VacationRequestRepository repository) {
     if (isOverlappingWithExistingRequest(vacationRequest, repository)) {
       throw new InvalidVacationRequestException(
-          INVALID_VACATION_STATUS_ERROR + vacationRequest.getEmployeeId());
+          OVERLAPPING_VACATION_REQUEST_ERROR + vacationRequest.getEmployeeId());
     }
   }
 
@@ -54,10 +52,14 @@ public class VacationRequestValidator {
   private void validateTheRemainingVacationDays(
       VacationRequest vacationRequest, VacationRequestRepository repository) {
 
-    // TODO: get this list of all the vacation days
+    List<VacationRequest> usedVacationDaysInTheCurrentYear =
+        getAllVacationRequestsForCurrentYear(vacationRequest, repository);
 
-    long existingUsedVacationDays = calculatedTotalOfUsedVacationDays();
+    long existingUsedVacationDays =
+        calculatedTotalOfUsedVacationDays(usedVacationDaysInTheCurrentYear);
+
     int newVacationRequestDays = calculateNewRequestedVacationRequest(vacationRequest);
+
     long totalVacationDays = existingUsedVacationDays + newVacationRequestDays;
 
     if (totalVacationDays > MAX_VACATION_DAYS_EACH_YEAR) {
@@ -72,6 +74,17 @@ public class VacationRequestValidator {
               + MAX_VACATION_DAYS_EACH_YEAR
               + " days.");
     }
+  }
+
+  private List<VacationRequest> getAllVacationRequestsForCurrentYear(
+      VacationRequest vacationRequest, VacationRequestRepository repository) {
+
+    int currentYear = LocalDate.now().getYear();
+    LocalDate startOfTheYear = LocalDate.of(currentYear, 1, 1);
+    LocalDate endOfTheYear = LocalDate.of(currentYear, 12, 31);
+
+    return repository.findByEmployeeIdAndOverlappingVacationDays(
+        vacationRequest.getEmployeeId(), startOfTheYear, endOfTheYear);
   }
 
   private long calculateDaysInRange(LocalDateTime startDate, LocalDateTime endDate) {

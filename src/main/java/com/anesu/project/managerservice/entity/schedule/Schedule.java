@@ -13,6 +13,7 @@ import lombok.*;
 @Entity
 @Getter
 @Setter
+@Builder
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
@@ -28,6 +29,7 @@ public class Schedule {
   private Long totalWorkingHours;
 
   private ScheduleStatus status;
+  private String rejectionReason;
 
   @ElementCollection List<ShiftEntry> shifts;
 
