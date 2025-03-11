@@ -33,5 +33,4 @@ public class VacationRequest {
   @ManyToOne
   @JoinColumn(name = "approved_by_manager_id")
   private Manager approvedByManager;
-
 }

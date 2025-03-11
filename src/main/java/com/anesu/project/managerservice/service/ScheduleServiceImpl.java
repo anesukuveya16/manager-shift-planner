@@ -4,6 +4,7 @@ import com.anesu.project.managerservice.entity.schedule.Schedule;
 import com.anesu.project.managerservice.entity.shift.ShiftEntry;
 import com.anesu.project.managerservice.entity.shift.ShiftRequest;
 import com.anesu.project.managerservice.entity.shift.ShiftRequestStatus;
+import com.anesu.project.managerservice.entity.vacation.VacationEntry;
 import com.anesu.project.managerservice.entity.vacation.VacationRequest;
 import com.anesu.project.managerservice.entity.vacation.VacationRequestStatus;
 import com.anesu.project.managerservice.model.ScheduleService;
@@ -105,46 +106,42 @@ public class ScheduleServiceImpl implements ScheduleService {
       Long employeeId, VacationRequest approvedVacationRequest) {
     if (!VacationRequestStatus.APPROVED.equals(approvedVacationRequest.getStatus())) {
       throw new InvalidScheduleException(
-              "Invalid schedule operation. Only approved vacation requests can be added to the schedule.");
+          "Invalid schedule operation. Only approved vacation requests can be added to the schedule.");
     }
     // checking the weekly range of the schedule
 
     LocalDateTime startOfVacationCalendarWeek =
-            approvedVacationRequest.getStartDate().with(DayOfWeek.MONDAY);
+        approvedVacationRequest.getStartDate().with(DayOfWeek.MONDAY);
     LocalDateTime endOfVacationCalendarWeek =
-            approvedVacationRequest.getEndDate().with(DayOfWeek.SUNDAY);
+        approvedVacationRequest.getEndDate().with(DayOfWeek.SUNDAY);
 
     // Find existing schedule for that employee in the given week
     Optional<Schedule> scheduleInApprovedVacationCalenderWeek =
-            scheduleRepository.findByEmployeeIdAndCalendarWeek(
-                    employeeId, startOfVacationCalendarWeek, endOfVacationCalendarWeek);
+        scheduleRepository.findByEmployeeIdAndCalendarWeek(
+            employeeId, startOfVacationCalendarWeek, endOfVacationCalendarWeek);
 
-    ShiftEntry shiftEntry = ShiftEntry.from(approvedVacationRequest);
+    VacationEntry vacationEntry = VacationEntry.from(approvedVacationRequest);
 
     if (scheduleInApprovedVacationCalenderWeek.isPresent()) {
 
       Schedule schedule = scheduleInApprovedVacationCalenderWeek.get();
-      schedule.getShifts().add(shiftEntry);
+      schedule.getVacations().add(approvedVacationRequest);
       return scheduleRepository.save(schedule);
 
     } else {
-      List<ShiftEntry> shiftEntries = new ArrayList<>();
-      shiftEntries.add(shiftEntry);
-
-      List<VacationRequest> vacationRequests = new ArrayList<>();
-      vacationRequests.add(approvedVacationRequest);
+      List<VacationEntry> vacationEntries = new ArrayList<>();
+      vacationEntries.add(vacationEntry);
 
       Schedule schedule =
-              Schedule.builder()
-                      .employeeId(employeeId)
-                      .startDate(approvedVacationRequest.getStartDate())
-                      .endDate(approvedVacationRequest.getEndDate())
-                      .approvedByManager(approvedVacationRequest.getApprovedByManager())
-                      .build();
+          Schedule.builder()
+              .employeeId(employeeId)
+              .startDate(approvedVacationRequest.getStartDate())
+              .endDate(approvedVacationRequest.getEndDate())
+              .approvedByManager(approvedVacationRequest.getApprovedByManager())
+              .build();
 
       return scheduleRepository.save(schedule);
     }
-
   }
 
   @Override
