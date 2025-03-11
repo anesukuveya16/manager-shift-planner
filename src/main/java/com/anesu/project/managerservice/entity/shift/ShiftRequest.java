@@ -30,8 +30,6 @@ public class ShiftRequest {
 
   private ShiftType shiftType;
 
-  private Long approvedBy;
-
   @ManyToOne
   @JoinColumn(name = "approved_by_manager_id")
   private Manager approvedByManager;

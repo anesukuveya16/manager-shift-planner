@@ -1,9 +1,6 @@
 package com.anesu.project.managerservice.entity.shift;
 
-import com.anesu.project.managerservice.entity.vacation.VacationRequest;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
 
@@ -16,7 +13,10 @@ import lombok.*;
 @NoArgsConstructor
 public class ShiftEntry {
 
-  @Id private Long shiftId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long shiftId;
+
   private LocalDateTime shiftDate;
   private ShiftType shiftType;
   private Long workingHours;
@@ -30,6 +30,4 @@ public class ShiftEntry {
         .workingHours(approvedShiftRequest.getShiftLengthInHours())
         .build();
   }
-
-
 }

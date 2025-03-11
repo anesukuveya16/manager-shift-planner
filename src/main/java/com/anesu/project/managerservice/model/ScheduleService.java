@@ -58,7 +58,7 @@ public interface ScheduleService {
   /**
    * Deletes a specific employee's schedule by ID (only if applicable to manager's permissions).
    *
-   * @param scheduleId the ID of the {@link Schedule} to delete
+   * @param employeeId the ID of the {@link Schedule} to delete
    */
-  void deleteSchedule(Long scheduleId);
+  void deleteSchedule(Long employeeId);
 }
