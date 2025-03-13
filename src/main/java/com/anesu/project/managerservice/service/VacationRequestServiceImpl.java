@@ -42,7 +42,7 @@ public class VacationRequestServiceImpl implements VacationRequestService {
     scheduleService.addApprovedVacationRequestToSchedule(
         vacationRequest.getEmployeeId(), approvedVacationRequest);
 
-    return vacationRequestRepository.save(approvedVacationRequest);
+    return approvedVacationRequest;
   }
 
   @Override
@@ -51,7 +51,6 @@ public class VacationRequestServiceImpl implements VacationRequestService {
 
     VacationRequest vacationRequest =
         getVacationRequestByIdAndStatus(vacationRequestId, VacationRequestStatus.PENDING);
-    vacationRequestValidator.validateVacationRequest(vacationRequest, vacationRequestRepository);
 
     vacationRequest.setStatus(VacationRequestStatus.REJECTED);
     vacationRequest.setRejectionReason(rejectionReason);
@@ -73,7 +72,7 @@ public class VacationRequestServiceImpl implements VacationRequestService {
   @Override
   public List<VacationRequest> getTeamCalendar(
       Long officeLocationId, LocalDateTime startDate, LocalDateTime endDate) {
-    return null;
+    return List.of();
   }
 
   @Override
