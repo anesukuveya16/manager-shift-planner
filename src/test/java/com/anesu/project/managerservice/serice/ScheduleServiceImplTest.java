@@ -5,12 +5,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.anesu.project.managerservice.entity.manager.Manager;
 import com.anesu.project.managerservice.entity.schedule.Schedule;
 import com.anesu.project.managerservice.entity.shift.ShiftRequest;
+import com.anesu.project.managerservice.entity.shift.ShiftRequestStatus;
 import com.anesu.project.managerservice.entity.shift.ShiftType;
+import com.anesu.project.managerservice.entity.vacation.VacationRequest;
+import com.anesu.project.managerservice.entity.vacation.VacationRequestStatus;
 import com.anesu.project.managerservice.model.repository.ScheduleRepository;
 import com.anesu.project.managerservice.service.ScheduleServiceImpl;
+import com.anesu.project.managerservice.service.exception.InvalidScheduleException;
 import com.anesu.project.managerservice.service.exception.ScheduleNotFoundException;
 import com.anesu.project.managerservice.service.util.ScheduleValidator;
 import java.time.LocalDate;
@@ -77,7 +80,10 @@ class ScheduleServiceImplTest {
   }
 
   @Test
-  void shouldRetrieveTheScheduleThroughTheGivenScheduleId() {
+  void shouldThrowExceptionWhenScheduleToBeUpdatedIsNotFound() {}
+
+  @Test
+  void shouldRetrieveTheScheduleByGivenScheduleId() {
     // Given
     long scheduleId = 100L;
     Schedule schedule = new Schedule();
@@ -92,20 +98,62 @@ class ScheduleServiceImplTest {
   }
 
   @Test
-  void addApprovedShiftToSchedule_ShouldThrowExceptionWhenShiftToBeAddedHasNotBeenApproved() {
+  void
+      addOnlyTheApprovedShiftToSchedule_ShouldThrowExceptionWhenShiftToBeAddedHasNotBeenApproved() {
     // Given
-    Manager manager = new Manager();
-    manager.setId(1000L);
-    manager.setFirstName("Bart");
-    manager.setLastName("Simpson");
 
     ShiftRequest shiftRequest = new ShiftRequest();
     shiftRequest.setEmployeeId(1L);
     shiftRequest.setId(shiftRequest.getId());
     shiftRequest.setShiftLengthInHours(6L);
     shiftRequest.setShiftType(ShiftType.NIGHT_SHIFT);
-    shiftRequest.setApprovedByManager(manager);
+    shiftRequest.setStatus(ShiftRequestStatus.PENDING);
     shiftRequest.setShiftDate(LocalDateTime.from(LocalDate.of(2025, 5, 29).atTime(20, 30)));
+
+    // When
+    InvalidScheduleException invalidScheduleException =
+        assertThrows(
+            InvalidScheduleException.class,
+            () -> cut.addShiftToSchedule(shiftRequest.getEmployeeId(), shiftRequest));
+
+    // Then
+    assertThat(invalidScheduleException.getMessage())
+        .isEqualTo(
+            "Invalid schedule operation. Only approved shifts can be added to the schedule.");
+  }
+
+  @Test
+  void
+      addOnlyTheApprovedVacationToSchedule_ShouldThrowExceptionWhenShiftToBeAddedHasNotBeenApproved() {
+    // Given
+
+    VacationRequest vacationRequest = new VacationRequest();
+    vacationRequest.setEmployeeId(10L);
+    vacationRequest.setOfficeLocationId(200L);
+    vacationRequest.setStatus(VacationRequestStatus.PENDING);
+    vacationRequest.setStartDate(LocalDateTime.from(LocalDate.of(2025, 5, 12).atTime(8, 0)));
+    vacationRequest.setEndDate(LocalDateTime.from(LocalDate.of(2025, 5, 23).atTime(8, 0)));
+
+    ShiftRequest shiftRequest = new ShiftRequest();
+    shiftRequest.setEmployeeId(1L);
+    shiftRequest.setId(shiftRequest.getId());
+    shiftRequest.setShiftLengthInHours(6L);
+    shiftRequest.setShiftType(ShiftType.NIGHT_SHIFT);
+    shiftRequest.setStatus(ShiftRequestStatus.PENDING);
+    shiftRequest.setShiftDate(LocalDateTime.from(LocalDate.of(2025, 5, 29).atTime(20, 30)));
+
+    // When
+    InvalidScheduleException invalidScheduleException =
+        assertThrows(
+            InvalidScheduleException.class,
+            () ->
+                cut.addApprovedVacationRequestToSchedule(
+                    vacationRequest.getEmployeeId(), vacationRequest));
+
+    // Then
+    assertThat(invalidScheduleException.getMessage())
+        .isEqualTo(
+            "Invalid schedule operation. Only approved vacation requests can be added to the schedule.");
   }
 
   @Test
