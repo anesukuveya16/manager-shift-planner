@@ -5,11 +5,18 @@ import com.anesu.project.managerservice.entity.shift.ShiftRequestStatus;
 import com.anesu.project.managerservice.service.exception.ShiftRequestNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface ShiftRequestService {
 
-  // TODO: To be implemented later:
-  // ShiftRequest createAndSendShiftRequestToEmployee(ShiftRequest shiftRequest);
+  /**
+   * Sends a shift request submitted by the manager.
+   *
+   * @param employeeId the ID of the employee who is required to approve or decline the shift request
+   * @param shiftRequest the shift that would then be approved or declined
+   * @return the approved {@link ShiftRequest} with updated status
+   */
+  ShiftRequest sendShiftRequestToEmployee(Long employeeId, ShiftRequest shiftRequest);
 
   /**
    * Approves a shift request submitted by an employee.
@@ -18,8 +25,7 @@ public interface ShiftRequestService {
    * @param shiftRequestId the ID of the shift request to approve
    * @return the approved {@link ShiftRequest} with updated status
    */
-  ShiftRequest approveShiftRequest(Long employeeId, Long shiftRequestId)
-      throws ShiftRequestNotFoundException;
+  ShiftRequest approveShiftRequest(Long employeeId, Long shiftRequestId);
 
   /**
    * Declines a shift request submitted by an employee, providing a reason.
@@ -37,7 +43,7 @@ public interface ShiftRequestService {
    * @param employeeId the ID of the employee whose shift request is being retrieved
    * @return the corresponding {@link ShiftRequest}, or {@code null} if not found
    */
-  ShiftRequest getShiftRequestByEmployeeId(Long employeeId);
+  Optional<ShiftRequest> getShiftRequestByEmployeeId(Long employeeId);
 
   /**
    * Retrieves a list of shift requests for an employee based on their status.

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 public interface ShiftRequestRepository extends JpaRepository<ShiftRequest, Long> {
   Optional<ShiftRequest> existsByIdAndShiftDate(Long employeeId, LocalDateTime shiftDate);
 
-  ShiftRequest findByEmployeeId(Long employeeId);
+  Optional<ShiftRequest> findByEmployeeId(Long employeeId);
 
   List<ShiftRequest> findByDateRange(LocalDateTime startDate, LocalDateTime endDate);
 
