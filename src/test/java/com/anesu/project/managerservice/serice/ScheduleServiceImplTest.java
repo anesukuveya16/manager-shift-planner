@@ -46,16 +46,16 @@ class ScheduleServiceImplTest {
     Schedule oldSchedule = new Schedule();
     oldSchedule.setId(100L);
     oldSchedule.setEmployeeId(1L);
+    oldSchedule.setTotalWorkingHours(6L);
     oldSchedule.setStartDate(LocalDate.now().plusDays(2).atTime(9, 0));
     oldSchedule.setEndDate(LocalDate.now().plusDays(3).atTime(15, 0));
-    oldSchedule.setTotalWorkingHours(6L);
 
     Schedule newSchedule = new Schedule();
     newSchedule.setId(100L);
     newSchedule.setEmployeeId(1L);
-    newSchedule.setStartDate(oldSchedule.getStartDate());
-    oldSchedule.setEndDate(LocalDate.now().plusDays(3).atTime(17, 0));
     newSchedule.setTotalWorkingHours(8L);
+    newSchedule.setStartDate(oldSchedule.getStartDate());
+    newSchedule.setEndDate(LocalDate.now().plusDays(3).atTime(17, 0));
 
     when(scheduleRepositoryMock.findById(oldSchedule.getEmployeeId()))
         .thenReturn(Optional.of(oldSchedule));
@@ -119,8 +119,8 @@ class ScheduleServiceImplTest {
     shiftRequest.setId(100L);
     shiftRequest.setShiftLengthInHours(6L);
     shiftRequest.setShiftType(ShiftType.NIGHT_SHIFT);
-    shiftRequest.setShiftDate(LocalDateTime.of(2025, 5, 29, 20, 30));
     shiftRequest.setStatus(ShiftRequestStatus.APPROVED);
+    shiftRequest.setShiftDate(LocalDateTime.of(2025, 5, 29, 20, 30));
 
     Schedule approvedShiftRequest = new Schedule();
 
@@ -139,6 +139,41 @@ class ScheduleServiceImplTest {
     assertThat(shiftEntry.getShiftDate()).isEqualTo(shiftRequest.getShiftDate());
     assertThat(shiftEntry.getWorkingHours()).isEqualTo(shiftRequest.getShiftLengthInHours());
     assertThat(shiftEntry.getShiftType()).isEqualTo(shiftRequest.getShiftType());
+  }
+
+  @Test
+  void updateEmployeeSchedule_shouldNotProceedWithScheduleUpdate_WhenValidationFails() {
+
+    // Given
+    Schedule oldSchedule = new Schedule();
+    oldSchedule.setId(100L);
+    oldSchedule.setEmployeeId(1L);
+    oldSchedule.setTotalWorkingHours(6L);
+    oldSchedule.setStartDate(LocalDate.now().plusDays(2).atTime(9, 0));
+    oldSchedule.setEndDate(LocalDate.now().plusDays(3).atTime(15, 0));
+
+    Schedule updatedSchedule = new Schedule();
+    updatedSchedule.setId(100L);
+    updatedSchedule.setEmployeeId(1L);
+    updatedSchedule.setTotalWorkingHours(8L);
+    updatedSchedule.setStartDate(LocalDate.now().plusDays(1).atTime(8,0));
+    updatedSchedule.setEndDate(LocalDate.now().plusDays(3).atTime(17, 0));
+
+    when(scheduleRepositoryMock.findById(oldSchedule.getId())).thenReturn(Optional.of(oldSchedule));
+
+    doThrow(ScheduleNotFoundException.class)
+        .when(scheduleValidatorMock)
+        .validateSchedule(updatedSchedule);
+
+    // When
+    assertThrows(
+        ScheduleNotFoundException.class,
+        () -> cut.updateEmployeeSchedule(oldSchedule.getId(), updatedSchedule));
+
+    // Then
+    verify(scheduleRepositoryMock, times(1)).findById(oldSchedule.getId());
+    verify(scheduleValidatorMock).validateSchedule(updatedSchedule);
+    verifyNoMoreInteractions(scheduleRepositoryMock);
   }
 
   @Test

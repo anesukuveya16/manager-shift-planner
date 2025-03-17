@@ -34,8 +34,7 @@ public interface ShiftRequestService {
    * @param rejectionReason the reason for rejecting the shift request
    * @return the declined {@link ShiftRequest} with updated status and reason
    */
-  ShiftRequest declineShiftRequest(Long employeeId, String rejectionReason)
-      throws ShiftRequestNotFoundException;
+  ShiftRequest declineShiftRequest(Long employeeId, String rejectionReason);
 
   /**
    * Retrieves a shift request for a specific employee.

@@ -1,5 +1,6 @@
 package com.anesu.project.managerservice.serice;
 
+import static org.assertj.core.api.FactoryBasedNavigableListAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -34,6 +35,30 @@ public class ShiftRequestServiceImplTest {
     cut =
         new ShiftRequestServiceImpl(
             shiftRequestRepositoryMock, shiftRequestValidatorMock, scheduleServiceMock);
+  }
+
+  @Test
+  void shouldSuccessfullyCreate_AndSaveShiftRequest() {
+    // Given
+
+    Long employeeId = 2L;
+    ShiftRequest shiftRequest = new ShiftRequest();
+    shiftRequest.setEmployeeId(employeeId);
+    shiftRequest.setShiftDate(LocalDateTime.now());
+    shiftRequest.setStatus(ShiftRequestStatus.PENDING);
+    shiftRequest.setShiftType(ShiftType.AFTERNOON_SHIFT);
+
+    when(shiftRequestRepositoryMock.save(any(ShiftRequest.class))).thenReturn(shiftRequest);
+
+    // When
+
+    ShiftRequest createdShiftRequest = cut.sendShiftRequestToEmployee(shiftRequest.getEmployeeId(), shiftRequest);
+
+    // Then
+    assertNotNull(createdShiftRequest);
+    assertEquals(shiftRequest, createdShiftRequest);
+    verify(shiftRequestRepositoryMock, times(1)).save(shiftRequest);
+
   }
 
   @Test
@@ -197,8 +222,7 @@ public class ShiftRequestServiceImplTest {
     shiftRequest.setShiftLengthInHours(12L);
     ShiftRequestStatus status = ShiftRequestStatus.PENDING;
 
-    when(shiftRequestRepositoryMock.findByIdAndStatus(shiftRequest.getId(), status))
-        .thenReturn(Optional.of(shiftRequest));
+
     doThrow(ShiftValidationException.class)
         .when(shiftRequestValidatorMock)
         .validateShiftRequest(shiftRequest, shiftRequestRepositoryMock);
@@ -206,13 +230,11 @@ public class ShiftRequestServiceImplTest {
     // When
 
     assertThrows(
-        ShiftValidationException.class, () -> cut.approveShiftRequest(employeeId, shiftRequestId));
+        ShiftValidationException.class, () -> cut.sendShiftRequestToEmployee(employeeId, shiftRequest));
 
     // Then
 
-    verify(shiftRequestRepositoryMock, times(1)).findByIdAndStatus(shiftRequestId, status);
     verifyNoMoreInteractions(shiftRequestRepositoryMock);
   }
-
-
 }
+

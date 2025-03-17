@@ -40,8 +40,7 @@ public class ShiftRequestServiceImpl implements ShiftRequestService {
   }
 
   @Override
-  public ShiftRequest approveShiftRequest(Long employeeId, Long shiftRequestId)
-      throws ShiftRequestNotFoundException {
+  public ShiftRequest approveShiftRequest(Long employeeId, Long shiftRequestId) {
 
     ShiftRequest shiftRequest =
         getShiftRequestByIdAndStatus(shiftRequestId, ShiftRequestStatus.PENDING);
@@ -94,7 +93,4 @@ public class ShiftRequestServiceImpl implements ShiftRequestService {
     return shiftRequestRepository.findByDateRange(startDate, endDate);
   }
 
-  private void validateShiftRequest(ShiftRequest shiftRequest) {
-    shiftRequestValidator.validateShiftRequest(shiftRequest, shiftRequestRepository);
-  }
 }
