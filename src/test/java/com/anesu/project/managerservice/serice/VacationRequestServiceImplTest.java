@@ -140,6 +140,7 @@ public class VacationRequestServiceImplTest {
 
     // Then
     assertEquals(VacationRequestStatus.REJECTED, rejectedVacationRequest.getStatus());
+
     verify(vacationRequestRepositoryMock, times(1)).save(vacationRequest);
   }
 
@@ -150,14 +151,15 @@ public class VacationRequestServiceImplTest {
     Long vacationRequestId = 10L;
     VacationRequestStatus status = VacationRequestStatus.PENDING;
 
-    when(vacationRequestRepositoryMock.findById(anyLong())).thenReturn(Optional.empty());
+    when(vacationRequestRepositoryMock.findByIdAndStatus(vacationRequestId, status))
+        .thenReturn(Optional.empty());
 
     // When & Then
     assertThrows(
         VacationRequestNotFoundException.class,
         () -> cut.approveVacationRequest(vacationRequestId, status));
 
-    verify(vacationRequestRepositoryMock, times(1)).findById(anyLong());
+    verify(vacationRequestRepositoryMock, times(1)).findByIdAndStatus(vacationRequestId, status);
     verifyNoMoreInteractions(vacationRequestRepositoryMock);
   }
 

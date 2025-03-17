@@ -6,18 +6,20 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.anesu.project.managerservice.entity.schedule.Schedule;
+import com.anesu.project.managerservice.entity.shift.ShiftEntry;
 import com.anesu.project.managerservice.entity.shift.ShiftRequest;
 import com.anesu.project.managerservice.entity.shift.ShiftRequestStatus;
 import com.anesu.project.managerservice.entity.shift.ShiftType;
+import com.anesu.project.managerservice.entity.vacation.VacationEntry;
 import com.anesu.project.managerservice.entity.vacation.VacationRequest;
 import com.anesu.project.managerservice.entity.vacation.VacationRequestStatus;
 import com.anesu.project.managerservice.model.repository.ScheduleRepository;
 import com.anesu.project.managerservice.service.ScheduleServiceImpl;
-import com.anesu.project.managerservice.service.exception.InvalidScheduleException;
 import com.anesu.project.managerservice.service.exception.ScheduleNotFoundException;
 import com.anesu.project.managerservice.service.util.ScheduleValidator;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,18 +48,18 @@ class ScheduleServiceImplTest {
     oldSchedule.setEmployeeId(1L);
     oldSchedule.setStartDate(LocalDate.now().plusDays(2).atTime(9, 0));
     oldSchedule.setEndDate(LocalDate.now().plusDays(3).atTime(15, 0));
-    oldSchedule.setTotalWorkingHours(6L); // Assign working hours
+    oldSchedule.setTotalWorkingHours(6L);
 
     Schedule newSchedule = new Schedule();
     newSchedule.setId(100L);
     newSchedule.setEmployeeId(1L);
-    newSchedule.setStartDate(oldSchedule.getStartDate()); // same start time from old schedule
+    newSchedule.setStartDate(oldSchedule.getStartDate());
     oldSchedule.setEndDate(LocalDate.now().plusDays(3).atTime(17, 0));
     newSchedule.setTotalWorkingHours(8L);
 
     when(scheduleRepositoryMock.findById(oldSchedule.getEmployeeId()))
         .thenReturn(Optional.of(oldSchedule));
-    doNothing().when(scheduleValidatorMock).validateSchedule(any(Schedule.class)); // validate the
+    doNothing().when(scheduleValidatorMock).validateSchedule(any(Schedule.class));
     when(scheduleRepositoryMock.save(any(Schedule.class))).thenReturn(newSchedule);
 
     // When
@@ -70,17 +72,28 @@ class ScheduleServiceImplTest {
     assertThat(newlyUpdatedSchedule.getTotalWorkingHours())
         .isEqualTo(newSchedule.getTotalWorkingHours());
 
-    verify(scheduleRepositoryMock, times(1))
-        .findById(
-            newlyUpdatedSchedule
-                .getId()); // makes sure that the existing schedule was called and retrieved once
-    verify(scheduleValidatorMock)
-        .validateSchedule(newlyUpdatedSchedule); // validation the new schedule
+    verify(scheduleValidatorMock).validateSchedule(newlyUpdatedSchedule);
     verify(scheduleRepositoryMock, times(1)).save(newlyUpdatedSchedule);
   }
 
   @Test
-  void shouldThrowExceptionWhenScheduleToBeUpdatedIsNotFound() {}
+  void shouldThrowExceptionWhenScheduleToBeUpdatedIsNotFound() {
+
+    // Given
+    Long scheduleId = 100L;
+    Schedule schedule = new Schedule();
+    schedule.setId(scheduleId);
+
+    when(scheduleRepositoryMock.findById(scheduleId)).thenReturn(Optional.empty());
+
+    // When
+    assertThrows(
+        ScheduleNotFoundException.class, () -> cut.updateEmployeeSchedule(scheduleId, schedule));
+
+    // Then
+    verify(scheduleRepositoryMock, times(1)).findById(scheduleId);
+    verifyNoMoreInteractions(scheduleRepositoryMock);
+  }
 
   @Test
   void shouldRetrieveTheScheduleByGivenScheduleId() {
@@ -98,62 +111,64 @@ class ScheduleServiceImplTest {
   }
 
   @Test
-  void
-      addOnlyTheApprovedShiftToSchedule_ShouldThrowExceptionWhenShiftToBeAddedHasNotBeenApproved() {
+  void shouldAddApprovedShiftRequestToSchedule() {
     // Given
-
+    Long employeeId = 1L;
     ShiftRequest shiftRequest = new ShiftRequest();
-    shiftRequest.setEmployeeId(1L);
-    shiftRequest.setId(shiftRequest.getId());
+    shiftRequest.setEmployeeId(employeeId);
+    shiftRequest.setId(100L);
     shiftRequest.setShiftLengthInHours(6L);
     shiftRequest.setShiftType(ShiftType.NIGHT_SHIFT);
-    shiftRequest.setStatus(ShiftRequestStatus.PENDING);
-    shiftRequest.setShiftDate(LocalDateTime.from(LocalDate.of(2025, 5, 29).atTime(20, 30)));
+    shiftRequest.setShiftDate(LocalDateTime.of(2025, 5, 29, 20, 30));
+    shiftRequest.setStatus(ShiftRequestStatus.APPROVED);
+
+    Schedule approvedShiftRequest = new Schedule();
+
+    when(scheduleRepositoryMock.save(any(Schedule.class))).thenReturn(approvedShiftRequest);
 
     // When
-    InvalidScheduleException invalidScheduleException =
-        assertThrows(
-            InvalidScheduleException.class,
-            () -> cut.addShiftToSchedule(shiftRequest.getEmployeeId(), shiftRequest));
+    Schedule updatedSchedule = cut.addShiftToSchedule(employeeId, shiftRequest);
 
     // Then
-    assertThat(invalidScheduleException.getMessage())
-        .isEqualTo(
-            "Invalid schedule operation. Only approved shifts can be added to the schedule.");
+    assertNotNull(updatedSchedule);
+
+    List<ShiftEntry> shifts = updatedSchedule.getShifts();
+    assertThat(shifts).hasSize(1);
+
+    ShiftEntry shiftEntry = shifts.getFirst();
+    assertThat(shiftEntry.getShiftDate()).isEqualTo(shiftRequest.getShiftDate());
+    assertThat(shiftEntry.getWorkingHours()).isEqualTo(shiftRequest.getShiftLengthInHours());
+    assertThat(shiftEntry.getShiftType()).isEqualTo(shiftRequest.getShiftType());
   }
 
   @Test
-  void
-      addOnlyTheApprovedVacationToSchedule_ShouldThrowExceptionWhenShiftToBeAddedHasNotBeenApproved() {
+  void addOnlyTheApprovedVacationToSchedule() {
+
     // Given
+    Long employeeId = 1L;
 
     VacationRequest vacationRequest = new VacationRequest();
-    vacationRequest.setEmployeeId(10L);
-    vacationRequest.setOfficeLocationId(200L);
-    vacationRequest.setStatus(VacationRequestStatus.PENDING);
-    vacationRequest.setStartDate(LocalDateTime.from(LocalDate.of(2025, 5, 12).atTime(8, 0)));
-    vacationRequest.setEndDate(LocalDateTime.from(LocalDate.of(2025, 5, 23).atTime(8, 0)));
+    vacationRequest.setEmployeeId(employeeId);
+    vacationRequest.setId(100L);
+    vacationRequest.setStatus(VacationRequestStatus.APPROVED);
+    vacationRequest.setStartDate(LocalDateTime.now());
+    vacationRequest.setEndDate(LocalDateTime.now().plusDays(10));
 
-    ShiftRequest shiftRequest = new ShiftRequest();
-    shiftRequest.setEmployeeId(1L);
-    shiftRequest.setId(shiftRequest.getId());
-    shiftRequest.setShiftLengthInHours(6L);
-    shiftRequest.setShiftType(ShiftType.NIGHT_SHIFT);
-    shiftRequest.setStatus(ShiftRequestStatus.PENDING);
-    shiftRequest.setShiftDate(LocalDateTime.from(LocalDate.of(2025, 5, 29).atTime(20, 30)));
+    Schedule approvedVacationRequest = new Schedule();
+
+    when(scheduleRepositoryMock.save(any(Schedule.class))).thenReturn(approvedVacationRequest);
 
     // When
-    InvalidScheduleException invalidScheduleException =
-        assertThrows(
-            InvalidScheduleException.class,
-            () ->
-                cut.addApprovedVacationRequestToSchedule(
-                    vacationRequest.getEmployeeId(), vacationRequest));
+    Schedule updatedSchedule =
+        cut.addApprovedVacationRequestToSchedule(employeeId, vacationRequest);
 
     // Then
-    assertThat(invalidScheduleException.getMessage())
-        .isEqualTo(
-            "Invalid schedule operation. Only approved vacation requests can be added to the schedule.");
+    List<VacationEntry> vacations = updatedSchedule.getVacations();
+
+    VacationEntry vacationEntry = vacations.getFirst();
+    assertThat(vacations).hasSize(10);
+    assertThat(vacationEntry.getStartDate()).isEqualTo(vacationRequest.getStartDate());
+    assertThat(vacationEntry.getEndDate()).isEqualTo(vacationRequest.getEndDate());
   }
 
   @Test

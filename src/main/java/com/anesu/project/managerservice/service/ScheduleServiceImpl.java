@@ -49,42 +49,20 @@ public class ScheduleServiceImpl implements ScheduleService {
 
   @Override
   public Schedule addShiftToSchedule(Long employeeId, ShiftRequest approvedShiftRequest) {
-    if (!ShiftRequestStatus.APPROVED.equals(approvedShiftRequest.getStatus())) {
-      throw new InvalidScheduleException(
-          "Invalid schedule operation. Only approved shifts can be added to the schedule.");
-    }
-    // checking the weekly range of the schedule
 
-    LocalDateTime startOfShiftCalendarWeek =
-        approvedShiftRequest.getShiftDate().with(DayOfWeek.MONDAY);
-    LocalDateTime endOfShiftCalendarWeek =
-        approvedShiftRequest.getShiftDate().with(DayOfWeek.SUNDAY);
+    validateApprovedShiftRequest(approvedShiftRequest);
 
-    // Find existing schedule for that employee in the given week
     Optional<Schedule> scheduleInApprovedShiftCalenderWeek =
-        scheduleRepository.findByEmployeeIdAndCalendarWeek(
-            employeeId, startOfShiftCalendarWeek, endOfShiftCalendarWeek);
-
-    ShiftEntry shiftEntry = ShiftEntry.from(approvedShiftRequest);
+        getScheduleForApprovedShiftCalendarWeek(employeeId, approvedShiftRequest);
 
     if (scheduleInApprovedShiftCalenderWeek.isPresent()) {
 
-      Schedule schedule = scheduleInApprovedShiftCalenderWeek.get();
-      schedule.getShifts().add(shiftEntry);
-      return scheduleRepository.save(schedule);
+      return addNewShiftEntryToExistingSchedule(
+          approvedShiftRequest, scheduleInApprovedShiftCalenderWeek);
 
     } else {
-      List<ShiftEntry> shiftEntries = new ArrayList<>();
-      shiftEntries.add(shiftEntry);
-
       Schedule schedule =
-          Schedule.builder()
-              .employeeId(employeeId)
-              .startDate(approvedShiftRequest.getShiftDate())
-              .endDate(determineShiftEndDate(approvedShiftRequest))
-              .totalWorkingHours(approvedShiftRequest.getShiftLengthInHours())
-              .shifts(shiftEntries)
-              .build();
+          createNewScheduleForApprovedVacationCalendarWeek(employeeId, approvedShiftRequest);
 
       return scheduleRepository.save(schedule);
     }
@@ -104,41 +82,20 @@ public class ScheduleServiceImpl implements ScheduleService {
   @Override
   public Schedule addApprovedVacationRequestToSchedule(
       Long employeeId, VacationRequest approvedVacationRequest) {
-    if (!VacationRequestStatus.APPROVED.equals(approvedVacationRequest.getStatus())) {
-      throw new InvalidScheduleException(
-          "Invalid schedule operation. Only approved vacation requests can be added to the schedule.");
-    }
-    // checking the weekly range of the schedule
 
-    LocalDateTime startOfVacationCalendarWeek =
-        approvedVacationRequest.getStartDate().with(DayOfWeek.MONDAY);
-    LocalDateTime endOfVacationCalendarWeek =
-        approvedVacationRequest.getEndDate().with(DayOfWeek.SUNDAY);
+    validateApprovedVacationRequest(approvedVacationRequest);
 
-    // Find existing schedule for that employee in the given week
     Optional<Schedule> scheduleInApprovedVacationCalenderWeek =
-        scheduleRepository.findByEmployeeIdAndCalendarWeek(
-            employeeId, startOfVacationCalendarWeek, endOfVacationCalendarWeek);
-
-    VacationEntry vacationEntry = VacationEntry.from(approvedVacationRequest);
+        getScheduleForApprovedVacationCalendarWeek(employeeId, approvedVacationRequest);
 
     if (scheduleInApprovedVacationCalenderWeek.isPresent()) {
 
-      Schedule schedule = scheduleInApprovedVacationCalenderWeek.get();
-      schedule.getVacations().add(approvedVacationRequest);
-      return scheduleRepository.save(schedule);
+      return addNewVacationEntryToExistingSchedule(
+          approvedVacationRequest, scheduleInApprovedVacationCalenderWeek);
 
     } else {
-      List<VacationEntry> vacationEntries = new ArrayList<>();
-      vacationEntries.add(vacationEntry);
-
       Schedule schedule =
-          Schedule.builder()
-              .employeeId(employeeId)
-              .startDate(approvedVacationRequest.getStartDate())
-              .endDate(approvedVacationRequest.getEndDate())
-              .approvedByManager(approvedVacationRequest.getApprovedByManager())
-              .build();
+          createNewScheduleForApprovedVacationCalendarWeek(employeeId, approvedVacationRequest);
 
       return scheduleRepository.save(schedule);
     }
@@ -152,20 +109,116 @@ public class ScheduleServiceImpl implements ScheduleService {
     scheduleRepository.deleteById(employeeId);
   }
 
-  private Schedule updatedExistingEmployeeSchedule(
+  private void updatedExistingEmployeeSchedule(
       Schedule updatedSchedule, Schedule existingSchedule) {
     existingSchedule.setStartDate(updatedSchedule.getStartDate());
     existingSchedule.setEndDate(updatedSchedule.getEndDate());
     existingSchedule.setShifts(updatedSchedule.getShifts());
     existingSchedule.setVacations(updatedSchedule.getVacations());
     existingSchedule.setTotalWorkingHours(updatedSchedule.getTotalWorkingHours());
-
-    return existingSchedule;
   }
 
   private LocalDateTime determineShiftEndDate(ShiftRequest approvedShiftRequest) {
     return approvedShiftRequest
         .getShiftDate()
         .plusHours(approvedShiftRequest.getShiftLengthInHours());
+  }
+
+  private void validateApprovedVacationRequest(VacationRequest approvedVacationRequest) {
+    if (!VacationRequestStatus.APPROVED.equals(approvedVacationRequest.getStatus())) {
+      throw new InvalidScheduleException(
+          "Invalid schedule operation. Only approved vacation requests can be added to the schedule.");
+    }
+  }
+
+  private Schedule addNewVacationEntryToExistingSchedule(
+      VacationRequest approvedVacationRequest,
+      Optional<Schedule> scheduleInApprovedVacationCalenderWeek) {
+
+    if (scheduleInApprovedVacationCalenderWeek.isPresent()) {
+      Schedule schedule = scheduleInApprovedVacationCalenderWeek.get();
+      schedule
+          .getVacations()
+          .add(VacationEntry.fromApprovedVacationRequest(approvedVacationRequest));
+      return scheduleRepository.save(schedule);
+    } else {
+      throw new IllegalArgumentException(
+          "No schedule found for the approved vacation calendar week");
+    }
+  }
+
+  private Schedule createNewScheduleForApprovedVacationCalendarWeek(
+      Long employeeId, VacationRequest approvedVacationRequest) {
+
+    List<VacationEntry> vacationEntries = new ArrayList<>();
+
+    VacationEntry vacationEntry =
+        VacationEntry.fromApprovedVacationRequest(approvedVacationRequest);
+    vacationEntries.add(vacationEntry);
+
+    return Schedule.builder()
+        .employeeId(employeeId)
+        .startDate(approvedVacationRequest.getStartDate())
+        .endDate(approvedVacationRequest.getEndDate())
+        .vacations(vacationEntries)
+        .build();
+  }
+
+  private Optional<Schedule> getScheduleForApprovedVacationCalendarWeek(
+      Long employeeId, VacationRequest approvedVacationRequest) {
+
+    LocalDateTime startOfVacationCalendarWeek =
+        approvedVacationRequest.getStartDate().with(DayOfWeek.MONDAY);
+    LocalDateTime endOfVacationCalendarWeek =
+        approvedVacationRequest.getEndDate().with(DayOfWeek.SUNDAY);
+
+    return scheduleRepository.findByEmployeeIdAndCalendarWeek(
+        employeeId, startOfVacationCalendarWeek, endOfVacationCalendarWeek);
+  }
+
+  private static void validateApprovedShiftRequest(ShiftRequest approvedShiftRequest) {
+    if (!ShiftRequestStatus.APPROVED.equals(approvedShiftRequest.getStatus())) {
+      throw new InvalidScheduleException(
+          "Invalid schedule operation. Only approved shifts can be added to the schedule.");
+    }
+  }
+
+  private Schedule addNewShiftEntryToExistingSchedule(
+      ShiftRequest approvedShiftRequest, Optional<Schedule> scheduleInApprovedShiftCalenderWeek) {
+
+    if (scheduleInApprovedShiftCalenderWeek.isPresent()) {
+      Schedule schedule = scheduleInApprovedShiftCalenderWeek.get();
+      schedule.getShifts().add(ShiftEntry.fromApprovedShiftEntry(approvedShiftRequest));
+      return scheduleRepository.save(schedule);
+    } else {
+      throw new IllegalArgumentException("No schedule found for the approved shift calendar week");
+    }
+  }
+
+  private Optional<Schedule> getScheduleForApprovedShiftCalendarWeek(
+      Long employeeId, ShiftRequest approvedShiftRequest) {
+    LocalDateTime startOfShiftCalendarWeek =
+        approvedShiftRequest.getShiftDate().with(DayOfWeek.MONDAY);
+    LocalDateTime endOfShiftCalendarWeek =
+        approvedShiftRequest.getShiftDate().with(DayOfWeek.SUNDAY);
+
+    return scheduleRepository.findByEmployeeIdAndCalendarWeek(
+        employeeId, startOfShiftCalendarWeek, endOfShiftCalendarWeek);
+  }
+
+  private Schedule createNewScheduleForApprovedVacationCalendarWeek(
+      Long employeeId, ShiftRequest approvedShiftRequest) {
+    List<ShiftEntry> shiftEntries = new ArrayList<>();
+
+    ShiftEntry shiftEntry = ShiftEntry.fromApprovedShiftEntry(approvedShiftRequest);
+    shiftEntries.add(shiftEntry);
+
+    return Schedule.builder()
+        .employeeId(employeeId)
+        .startDate(approvedShiftRequest.getShiftDate())
+        .endDate(determineShiftEndDate(approvedShiftRequest))
+        .totalWorkingHours(approvedShiftRequest.getShiftLengthInHours())
+        .shifts(shiftEntries)
+        .build();
   }
 }

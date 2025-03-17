@@ -9,6 +9,7 @@ import com.anesu.project.managerservice.service.exception.ShiftRequestNotFoundEx
 import com.anesu.project.managerservice.service.util.ShiftRequestValidator;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -45,22 +46,19 @@ public class ShiftRequestServiceImpl implements ShiftRequestService {
   }
 
   @Override
-  public ShiftRequest declineShiftRequest(Long shiftRequestId, String rejectionReason)
-      throws ShiftRequestNotFoundException {
+  public ShiftRequest declineShiftRequest(Long shiftRequestId, String rejectionReason) {
 
     ShiftRequest shiftRequest =
-        getShiftRequestByIdAndStatus(shiftRequestId, ShiftRequestStatus.REJECTED);
-
-    shiftRequestValidator.validateShiftRequest(shiftRequest, shiftRequestRepository);
+        getShiftRequestByIdAndStatus(shiftRequestId, ShiftRequestStatus.PENDING);
 
     shiftRequest.setStatus(ShiftRequestStatus.REJECTED);
-    shiftRequest.setRejectionReason(shiftRequest.getRejectionReason());
+    shiftRequest.setRejectionReason(rejectionReason);
 
     return shiftRequestRepository.save(shiftRequest);
   }
 
   @Override
-  public ShiftRequest getShiftRequestByEmployeeId(Long employeeId) {
+  public Optional<ShiftRequest> getShiftRequestByEmployeeId(Long employeeId) {
     return shiftRequestRepository.findByEmployeeId(employeeId);
   }
 
@@ -72,7 +70,11 @@ public class ShiftRequestServiceImpl implements ShiftRequestService {
         .orElseThrow(
             () ->
                 new ShiftRequestNotFoundException(
-                    "Could not find pending shift request with ID: " + shiftRequestId));
+                    "Could not find shift with status []"
+                        + status
+                        + " and ID [] "
+                        + shiftRequestId
+                        + "to approve."));
   }
 
   @Override

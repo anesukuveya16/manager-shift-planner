@@ -29,8 +29,7 @@ public class VacationRequestServiceImpl implements VacationRequestService {
 
   @Override
   public VacationRequest approveVacationRequest(
-      Long vacationRequestId, VacationRequestStatus status)
-      throws VacationRequestNotFoundException {
+      Long vacationRequestId, VacationRequestStatus status) {
 
     VacationRequest vacationRequest =
         getVacationRequestByIdAndStatus(vacationRequestId, VacationRequestStatus.PENDING);
@@ -46,8 +45,7 @@ public class VacationRequestServiceImpl implements VacationRequestService {
   }
 
   @Override
-  public VacationRequest declineVacationRequest(Long vacationRequestId, String rejectionReason)
-      throws VacationRequestNotFoundException {
+  public VacationRequest declineVacationRequest(Long vacationRequestId, String rejectionReason) {
 
     VacationRequest vacationRequest =
         getVacationRequestByIdAndStatus(vacationRequestId, VacationRequestStatus.PENDING);
@@ -84,6 +82,6 @@ public class VacationRequestServiceImpl implements VacationRequestService {
         .orElseThrow(
             () ->
                 new VacationRequestNotFoundException(
-                    "Vacation request not found with ID: " + vacationRequestId));
+                    "Vacation request with id: " + vacationRequestId + " does not exist."));
   }
 }
