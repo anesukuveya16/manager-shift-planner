@@ -33,9 +33,10 @@ public class ScheduleValidatorTest {
   @Test
   void validateDates_shouldThrowExceptionWhenStartDateIsNull() {
     // Given
-    List<ShiftEntry> shiftEntries = new ArrayList<>();
 
     Schedule schedule = new Schedule();
+    List<ShiftEntry> shiftEntries = new ArrayList<>();
+
     schedule.setStartDate(null);
     schedule.setEndDate(END_DATE);
     schedule.setShifts(shiftEntries);

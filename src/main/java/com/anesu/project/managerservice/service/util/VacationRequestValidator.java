@@ -79,9 +79,9 @@ public class VacationRequestValidator {
   private List<VacationRequest> getAllVacationRequestsForCurrentYear(
       VacationRequest vacationRequest, VacationRequestRepository repository) {
 
-    int currentYear = LocalDate.now().getYear();
-    LocalDate startOfTheYear = LocalDate.of(currentYear, 1, 1);
-    LocalDate endOfTheYear = LocalDate.of(currentYear, 12, 31);
+    int currentYear = LocalDateTime.now().getYear();
+    LocalDateTime startOfTheYear = LocalDateTime.of(currentYear, 1, 1, 0, 0);
+    LocalDateTime endOfTheYear = LocalDateTime.of(currentYear, 12, 31, 0, 0);
 
     return repository.findByEmployeeIdAndOverlappingVacationDays(
         vacationRequest.getEmployeeId(), startOfTheYear, endOfTheYear);
