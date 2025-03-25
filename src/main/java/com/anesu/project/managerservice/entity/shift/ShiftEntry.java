@@ -21,10 +21,8 @@ public class ShiftEntry {
   private ShiftType shiftType;
   private Long workingHours;
 
-  // insert the builder to add approved shift requests into the schedule
-
-  public static ShiftEntry from(ShiftRequest approvedShiftRequest) {
-    return builder()
+  public static ShiftEntry fromApprovedShiftEntry(ShiftRequest approvedShiftRequest) {
+    return ShiftEntry.builder()
         .shiftDate(approvedShiftRequest.getShiftDate())
         .shiftType(approvedShiftRequest.getShiftType())
         .workingHours(approvedShiftRequest.getShiftLengthInHours())

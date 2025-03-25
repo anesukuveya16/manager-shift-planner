@@ -1,4 +1,4 @@
-package com.anesu.project.managerservice.serice;
+package com.anesu.project.managerservice.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -9,7 +9,6 @@ import com.anesu.project.managerservice.entity.vacation.VacationRequest;
 import com.anesu.project.managerservice.entity.vacation.VacationRequestStatus;
 import com.anesu.project.managerservice.model.ScheduleService;
 import com.anesu.project.managerservice.model.repository.VacationRequestRepository;
-import com.anesu.project.managerservice.service.VacationRequestServiceImpl;
 import com.anesu.project.managerservice.service.exception.InvalidVacationRequestException;
 import com.anesu.project.managerservice.service.exception.VacationRequestNotFoundException;
 import com.anesu.project.managerservice.service.util.VacationRequestValidator;
@@ -94,7 +93,7 @@ public class VacationRequestServiceImplTest {
 
   @Test
   void
-      shouldThrowExceptionWhenValidationFails_WhenGivenVacationRequestExccedsRemainingAnnualVacationDays() {
+      shouldThrowExceptionWhenValidationFails_WhenGivenVacationRequestExceedsRemainingAnnualVacationDays() {
     // Given
     Long vacationRequestId = 1L;
     VacationRequest vacationRequest = new VacationRequest();

@@ -21,7 +21,7 @@ public interface VacationRequestRepository extends JpaRepository<VacationRequest
   @Query(
       "SELECT v FROM VacationRequest v WHERE v.employee.id = :employeeId "
           + "AND (v.startDate <= :endOfYear AND v.endDate >= :startOfYear)")
-  List<VacationRequest> findByEmployeeIdAndOverlappingVacationDays(
+  List<VacationRequest> findByEmployeeIdAndOverlappingIntoNewYear(
       @Param("employeeId") Long employeeId,
       @Param("startOfYear") LocalDateTime startDate,
       @Param("endOfYear") LocalDateTime endDate);

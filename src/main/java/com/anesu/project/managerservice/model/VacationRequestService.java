@@ -29,8 +29,7 @@ public interface VacationRequestService {
    * @param rejectionReason The reason for rejecting the request.
    * @return The updated {@link VacationRequest} after being declined.
    */
-  VacationRequest declineVacationRequest(Long vacationRequestId, String rejectionReason)
-      throws VacationRequestNotFoundException;
+  VacationRequest declineVacationRequest(Long vacationRequestId, String rejectionReason);
 
   /**
    * Retrieves a list of vacation requests for a specific employee.

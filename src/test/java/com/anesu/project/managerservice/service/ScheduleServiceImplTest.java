@@ -1,4 +1,4 @@
-package com.anesu.project.managerservice.serice;
+package com.anesu.project.managerservice.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,7 +14,6 @@ import com.anesu.project.managerservice.entity.vacation.VacationEntry;
 import com.anesu.project.managerservice.entity.vacation.VacationRequest;
 import com.anesu.project.managerservice.entity.vacation.VacationRequestStatus;
 import com.anesu.project.managerservice.model.repository.ScheduleRepository;
-import com.anesu.project.managerservice.service.ScheduleServiceImpl;
 import com.anesu.project.managerservice.service.exception.ScheduleNotFoundException;
 import com.anesu.project.managerservice.service.util.ScheduleValidator;
 import java.time.LocalDate;
@@ -156,7 +155,7 @@ class ScheduleServiceImplTest {
     updatedSchedule.setId(100L);
     updatedSchedule.setEmployeeId(1L);
     updatedSchedule.setTotalWorkingHours(8L);
-    updatedSchedule.setStartDate(LocalDate.now().plusDays(1).atTime(8,0));
+    updatedSchedule.setStartDate(LocalDate.now().plusDays(1).atTime(8, 0));
     updatedSchedule.setEndDate(LocalDate.now().plusDays(3).atTime(17, 0));
 
     when(scheduleRepositoryMock.findById(oldSchedule.getId())).thenReturn(Optional.of(oldSchedule));

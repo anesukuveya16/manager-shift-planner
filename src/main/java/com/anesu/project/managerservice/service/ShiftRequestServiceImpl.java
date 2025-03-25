@@ -92,5 +92,4 @@ public class ShiftRequestServiceImpl implements ShiftRequestService {
       LocalDateTime startDate, LocalDateTime endDate) {
     return shiftRequestRepository.findByDateRange(startDate, endDate);
   }
-
 }

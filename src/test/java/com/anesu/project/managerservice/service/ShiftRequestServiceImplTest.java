@@ -1,6 +1,5 @@
-package com.anesu.project.managerservice.serice;
+package com.anesu.project.managerservice.service;
 
-import static org.assertj.core.api.FactoryBasedNavigableListAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -9,7 +8,6 @@ import com.anesu.project.managerservice.entity.shift.ShiftRequestStatus;
 import com.anesu.project.managerservice.entity.shift.ShiftType;
 import com.anesu.project.managerservice.model.ScheduleService;
 import com.anesu.project.managerservice.model.repository.ShiftRequestRepository;
-import com.anesu.project.managerservice.service.ShiftRequestServiceImpl;
 import com.anesu.project.managerservice.service.exception.ShiftRequestNotFoundException;
 import com.anesu.project.managerservice.service.exception.ShiftValidationException;
 import com.anesu.project.managerservice.service.util.ShiftRequestValidator;
@@ -52,13 +50,13 @@ public class ShiftRequestServiceImplTest {
 
     // When
 
-    ShiftRequest createdShiftRequest = cut.sendShiftRequestToEmployee(shiftRequest.getEmployeeId(), shiftRequest);
+    ShiftRequest createdShiftRequest =
+        cut.sendShiftRequestToEmployee(shiftRequest.getEmployeeId(), shiftRequest);
 
     // Then
     assertNotNull(createdShiftRequest);
     assertEquals(shiftRequest, createdShiftRequest);
     verify(shiftRequestRepositoryMock, times(1)).save(shiftRequest);
-
   }
 
   @Test
@@ -222,7 +220,6 @@ public class ShiftRequestServiceImplTest {
     shiftRequest.setShiftLengthInHours(12L);
     ShiftRequestStatus status = ShiftRequestStatus.PENDING;
 
-
     doThrow(ShiftValidationException.class)
         .when(shiftRequestValidatorMock)
         .validateShiftRequest(shiftRequest, shiftRequestRepositoryMock);
@@ -230,11 +227,11 @@ public class ShiftRequestServiceImplTest {
     // When
 
     assertThrows(
-        ShiftValidationException.class, () -> cut.sendShiftRequestToEmployee(employeeId, shiftRequest));
+        ShiftValidationException.class,
+        () -> cut.sendShiftRequestToEmployee(employeeId, shiftRequest));
 
     // Then
 
     verifyNoMoreInteractions(shiftRequestRepositoryMock);
   }
 }
-

@@ -25,8 +25,7 @@ public class VacationEntry {
   private LocalDateTime endDate;
   private Long vacationDuration;
 
-  // method adds the approved vacation requests to the schedule
-  public static VacationEntry from(VacationRequest vacationRequest) {
+  public static VacationEntry fromApprovedVacationRequest(VacationRequest vacationRequest) {
     return VacationEntry.builder()
         .startDate(vacationRequest.getStartDate())
         .endDate(vacationRequest.getEndDate())

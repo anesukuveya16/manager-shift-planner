@@ -12,7 +12,8 @@ public interface ShiftRequestService {
   /**
    * Sends a shift request submitted by the manager.
    *
-   * @param employeeId the ID of the employee who is required to approve or decline the shift request
+   * @param employeeId the ID of the employee who is required to approve or decline the shift
+   *     request
    * @param shiftRequest the shift that would then be approved or declined
    * @return the approved {@link ShiftRequest} with updated status
    */

@@ -42,11 +42,17 @@ public class VacationRequestValidator {
 
     for (VacationRequest existingRequest : existingRequests) {
       if (existingRequest.getStatus().equals(VacationRequestStatus.APPROVED)
-          || existingRequest.getStatus().equals(VacationRequestStatus.PENDING)) {
+          || existingRequest.getStatus().equals(VacationRequestStatus.PENDING)
+              && isOverlapping(existingRequest, vacationRequest)) {
         return true;
       }
     }
     return false;
+  }
+
+  private boolean isOverlapping(VacationRequest existing, VacationRequest newRequest) {
+    return !(existing.getEndDate().isBefore(newRequest.getStartDate())
+        || existing.getStartDate().isAfter(newRequest.getEndDate()));
   }
 
   private void validateTheRemainingVacationDays(
@@ -83,7 +89,7 @@ public class VacationRequestValidator {
     LocalDateTime startOfTheYear = LocalDateTime.of(currentYear, 1, 1, 0, 0);
     LocalDateTime endOfTheYear = LocalDateTime.of(currentYear, 12, 31, 0, 0);
 
-    return repository.findByEmployeeIdAndOverlappingVacationDays(
+    return repository.findByEmployeeIdAndOverlappingIntoNewYear(
         vacationRequest.getEmployeeId(), startOfTheYear, endOfTheYear);
   }
 
