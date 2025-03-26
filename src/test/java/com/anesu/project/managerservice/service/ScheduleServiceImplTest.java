@@ -42,37 +42,37 @@ class ScheduleServiceImplTest {
   @Test
   void shouldUpdateAndSaveTheNewlyUpdatedSchedule() {
     // Given
-    Schedule oldSchedule = new Schedule();
-    oldSchedule.setId(100L);
-    oldSchedule.setEmployeeId(1L);
-    oldSchedule.setTotalWorkingHours(6L);
-    oldSchedule.setStartDate(LocalDate.now().plusDays(2).atTime(9, 0));
-    oldSchedule.setEndDate(LocalDate.now().plusDays(3).atTime(15, 0));
+    Schedule existingSchedule = new Schedule();
+    existingSchedule.setId(100L);
+    existingSchedule.setEmployeeId(1L);
+    existingSchedule.setTotalWorkingHours(6L);
+    existingSchedule.setStartDate(LocalDate.now().plusDays(2).atTime(9, 0));
+    existingSchedule.setEndDate(LocalDate.now().plusDays(3).atTime(15, 0));
 
     Schedule newSchedule = new Schedule();
     newSchedule.setId(100L);
     newSchedule.setEmployeeId(1L);
     newSchedule.setTotalWorkingHours(8L);
-    newSchedule.setStartDate(oldSchedule.getStartDate());
+    newSchedule.setStartDate(existingSchedule.getStartDate());
     newSchedule.setEndDate(LocalDate.now().plusDays(3).atTime(17, 0));
 
-    when(scheduleRepositoryMock.findById(oldSchedule.getEmployeeId()))
-        .thenReturn(Optional.of(oldSchedule));
+    when(scheduleRepositoryMock.findById(existingSchedule.getId()))
+        .thenReturn(Optional.of(existingSchedule));
     doNothing().when(scheduleValidatorMock).validateSchedule(any(Schedule.class));
     when(scheduleRepositoryMock.save(any(Schedule.class))).thenReturn(newSchedule);
 
     // When
     Schedule newlyUpdatedSchedule =
-        cut.updateEmployeeSchedule(oldSchedule.getEmployeeId(), newSchedule);
+        cut.updateEmployeeSchedule(existingSchedule.getId(), newSchedule);
 
     // Then
     assertNotNull(newlyUpdatedSchedule);
-    assertThat(newlyUpdatedSchedule.getEmployeeId()).isEqualTo(oldSchedule.getEmployeeId());
+    assertThat(newlyUpdatedSchedule.getEmployeeId()).isEqualTo(existingSchedule.getEmployeeId());
     assertThat(newlyUpdatedSchedule.getTotalWorkingHours())
         .isEqualTo(newSchedule.getTotalWorkingHours());
 
-    verify(scheduleValidatorMock).validateSchedule(newlyUpdatedSchedule);
-    verify(scheduleRepositoryMock, times(1)).save(newlyUpdatedSchedule);
+    verify(scheduleValidatorMock).validateSchedule(existingSchedule);
+    verify(scheduleRepositoryMock, times(1)).save(existingSchedule);
   }
 
   @Test
@@ -162,7 +162,7 @@ class ScheduleServiceImplTest {
 
     doThrow(ScheduleNotFoundException.class)
         .when(scheduleValidatorMock)
-        .validateSchedule(updatedSchedule);
+        .validateSchedule(oldSchedule);
 
     // When
     assertThrows(
@@ -171,7 +171,7 @@ class ScheduleServiceImplTest {
 
     // Then
     verify(scheduleRepositoryMock, times(1)).findById(oldSchedule.getId());
-    verify(scheduleValidatorMock).validateSchedule(updatedSchedule);
+    verify(scheduleValidatorMock).validateSchedule(oldSchedule);
     verifyNoMoreInteractions(scheduleRepositoryMock);
   }
 

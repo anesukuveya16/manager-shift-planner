@@ -74,7 +74,7 @@ public class VacationRequestValidatorTest {
                   vacationRequest.setEmployeeId(305L);
                   vacationRequest.setStartDate(startDate);
                   vacationRequest.setEndDate(endDate);
-                  vacationRequest.setStatus(VacationRequestStatus.PENDING);
+                  vacationRequest.setStatus(VacationRequestStatus.APPROVED);
                   return vacationRequest;
                 })
             .toList();
@@ -151,7 +151,8 @@ public class VacationRequestValidatorTest {
   }
 
   @Test
-  void shouldThrowException_WhenRemainingVacationDaysSpanningIntoNewYear_AreNotWithinPreviousAnnualLimit() {
+  void
+      shouldThrowException_WhenRemainingVacationDaysSpanningIntoNewYear_AreNotWithinPreviousAnnualLimit() {
     // Given
     List<VacationRequest> usedVacationRequests =
         pastApprovedRealisticVacationRequestScenarioInCurrentYear();
@@ -175,8 +176,6 @@ public class VacationRequestValidatorTest {
     // Then
     verify(vacationRequestRepositoryMock, never()).save(any());
   }
-
-
 
   // Helper methods
   private VacationRequest newlyCreatedPendingVacationRequest() {

@@ -12,7 +12,10 @@ import com.anesu.project.managerservice.model.repository.VacationRequestReposito
 import com.anesu.project.managerservice.service.exception.InvalidVacationRequestException;
 import com.anesu.project.managerservice.service.exception.VacationRequestNotFoundException;
 import com.anesu.project.managerservice.service.util.VacationRequestValidator;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,59 +66,6 @@ public class VacationRequestServiceImplTest {
     verify(scheduleServiceMock)
         .addApprovedVacationRequestToSchedule(
             vacationRequest.getEmployeeId(), approvedVacationRequest);
-  }
-
-  @Test
-  void shouldThrowExceptionWhenValidationFailsDueToOverlappingVacationRequest() {
-    // Given
-    Long vacationRequestId = 1L;
-    VacationRequest vacationRequest = new VacationRequest();
-    vacationRequest.setId(vacationRequestId);
-    VacationRequestStatus status = VacationRequestStatus.PENDING;
-    vacationRequest.setStartDate(LocalDateTime.now());
-    vacationRequest.setEndDate(LocalDateTime.now().plusDays(10));
-    vacationRequest.setOfficeLocationId(vacationRequest.getOfficeLocationId());
-
-    when(vacationRequestRepositoryMock.findByIdAndStatus(vacationRequestId, status))
-        .thenReturn(Optional.of(vacationRequest));
-
-    // When
-    InvalidVacationRequestException invalidVacationRequestException =
-        assertThrows(
-            InvalidVacationRequestException.class,
-            () -> cut.approveVacationRequest(vacationRequest.getId(), status));
-
-    // Then
-    assertThat(invalidVacationRequestException.getMessage())
-        .isEqualTo(
-            "Request could not be fulfilled because there is already an approved vacation request for this period for employee: ");
-  }
-
-  @Test
-  void
-      shouldThrowExceptionWhenValidationFails_WhenGivenVacationRequestExceedsRemainingAnnualVacationDays() {
-    // Given
-    Long vacationRequestId = 1L;
-    VacationRequest vacationRequest = new VacationRequest();
-    vacationRequest.setId(vacationRequestId);
-    VacationRequestStatus status = VacationRequestStatus.PENDING;
-    vacationRequest.setStartDate(LocalDateTime.now());
-    vacationRequest.setEndDate(LocalDateTime.now().plusDays(10));
-    vacationRequest.setOfficeLocationId(vacationRequest.getOfficeLocationId());
-
-    when(vacationRequestRepositoryMock.findByIdAndStatus(vacationRequestId, status))
-        .thenReturn(Optional.of(vacationRequest));
-
-    // When
-    InvalidVacationRequestException invalidVacationRequestException =
-        assertThrows(
-            InvalidVacationRequestException.class,
-            () -> cut.approveVacationRequest(vacationRequest.getId(), status));
-
-    // Then
-    assertThat(invalidVacationRequestException.getMessage())
-        .isEqualTo(
-            "Request could not be fulfilled because there is already an approved vacation request for this period for employee: ");
   }
 
   @Test

@@ -2,9 +2,12 @@ package com.anesu.project.managerservice.service.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 import com.anesu.project.managerservice.entity.schedule.Schedule;
 import com.anesu.project.managerservice.entity.shift.ShiftEntry;
+import com.anesu.project.managerservice.entity.shift.ShiftType;
+import com.anesu.project.managerservice.entity.vacation.VacationEntry;
 import com.anesu.project.managerservice.service.exception.InvalidScheduleException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,7 +24,7 @@ public class ScheduleValidatorTest {
   private static final LocalDateTime START_DATE =
       LocalDateTime.from(LocalDate.of(2024, 2, 20).atTime(10, 0));
   private static final LocalDateTime END_DATE =
-      LocalDateTime.from(LocalDate.of(2024, 2, 25).atTime(18, 0, 0));
+      LocalDateTime.from(LocalDate.of(2024, 2, 21).atTime(18, 0));
 
   private ScheduleValidator cut;
 
@@ -34,12 +37,7 @@ public class ScheduleValidatorTest {
   void validateDates_shouldThrowExceptionWhenStartDateIsNull() {
     // Given
 
-    Schedule schedule = new Schedule();
-    List<ShiftEntry> shiftEntries = new ArrayList<>();
-
-    schedule.setStartDate(null);
-    schedule.setEndDate(END_DATE);
-    schedule.setShifts(shiftEntries);
+    Schedule schedule = providedSchedule(null, END_DATE, null, null);
 
     // When
     InvalidScheduleException invalidScheduleException =
@@ -52,12 +50,8 @@ public class ScheduleValidatorTest {
   @Test
   void validateDates_shouldThrowExceptionWhenEndDateIsNull() {
     // Given
-    List<ShiftEntry> shiftEntries = new ArrayList<>();
 
-    Schedule schedule = new Schedule();
-    schedule.setStartDate(START_DATE);
-    schedule.setEndDate(null);
-    schedule.setShifts(shiftEntries);
+    Schedule schedule = providedSchedule(START_DATE, null, null, null);
 
     // When
     InvalidScheduleException invalidScheduleException =
@@ -70,11 +64,7 @@ public class ScheduleValidatorTest {
   @Test
   void validateDates_shouldThrowExceptionWhenShiftsOrVacationAreNull() {
     // Given
-    Schedule schedule = new Schedule();
-    schedule.setStartDate(START_DATE);
-    schedule.setEndDate(END_DATE);
-    schedule.setShifts(null);
-    schedule.setVacations(null);
+    Schedule schedule = providedSchedule(START_DATE, END_DATE, null, null);
 
     // When
     InvalidScheduleException invalidScheduleException =
@@ -87,8 +77,6 @@ public class ScheduleValidatorTest {
   @Test
   void validateDates_shouldThrowException_WhenEndDateAfterStartDate() {
     // Given
-
-    List<ShiftEntry> shiftEntries = new ArrayList<>();
 
     Schedule schedule = new Schedule();
     schedule.setStartDate(LocalDateTime.of(2025, 12, 10, 14, 0));
@@ -106,13 +94,12 @@ public class ScheduleValidatorTest {
   void validateWorkingHours_shouldThrowExceptionWhenWorkingHoursExceed_MaxHoursPerShift() {
     // Given
 
-    List<ShiftEntry> shiftEntries = new ArrayList<>();
+    ShiftEntry shiftEntry = new ShiftEntry();
 
-    Schedule schedule = new Schedule();
-    schedule.setStartDate(START_DATE);
-    schedule.setEndDate(END_DATE);
-    schedule.setTotalWorkingHours(12L);
-    schedule.setShifts(shiftEntries);
+    shiftEntry.setWorkingHours(10L);
+    shiftEntry.setShiftType(ShiftType.AFTERNOON_SHIFT);
+
+    Schedule schedule = providedSchedule(START_DATE, END_DATE, List.of(shiftEntry), null);
 
     // When
     InvalidScheduleException invalidScheduleException =
@@ -121,4 +108,52 @@ public class ScheduleValidatorTest {
     // Then
     assertEquals(invalidScheduleException.getMessage(), "Shift exceeds maximum working hours.");
   }
+
+
+  @Test
+  void validateWeeklyWorkingHours_shouldThrowExceptionWhenWorkingHoursHaveBeenExceeded() {
+    // Given
+
+    Schedule schedule =
+        providedSchedule(START_DATE, END_DATE, givenMultipleShiftEntries(), null);
+
+    // When
+    InvalidScheduleException invalidScheduleException =
+        assertThrows(InvalidScheduleException.class, () -> cut.validateSchedule(schedule));
+
+    // Then
+
+    assertEquals(invalidScheduleException.getMessage(), "Weekly working hours exceed maximum limit.");
+  }
+
+  private Schedule providedSchedule(
+      LocalDateTime startDate,
+      LocalDateTime endDate,
+      List<ShiftEntry> shiftEntries,
+      List<VacationEntry> vacationEntries) {
+    Schedule schedule = new Schedule();
+    schedule.setStartDate(startDate);
+    schedule.setEndDate(endDate);
+    schedule.setShifts(shiftEntries);
+    schedule.setVacations(vacationEntries);
+    return schedule;
+  }
+
+  private List<ShiftEntry> givenMultipleShiftEntries() {
+    List<ShiftEntry> shiftEntries = new ArrayList<>();
+
+    LocalDateTime shiftStartDate = LocalDateTime.of(2024, 12, 28, 20, 0);
+
+    for (int i = 0; i < 7; i++) {
+      ShiftEntry shiftEntry = new ShiftEntry();
+      shiftEntry.setWorkingHours(8L);
+      shiftEntry.setShiftDate(shiftStartDate);
+      shiftEntry.setShiftType(ShiftType.NIGHT_SHIFT);
+
+      shiftEntries.add(shiftEntry);
+    }
+
+    return shiftEntries;
+  }
+
 }

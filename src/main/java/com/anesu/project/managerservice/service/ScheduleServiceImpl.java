@@ -34,23 +34,24 @@ public class ScheduleServiceImpl implements ScheduleService {
 
   @Override
   public Schedule updateEmployeeSchedule(Long scheduleId, Schedule updatedSchedule) {
-    Schedule existingEmployeeScheduleToUpdate =
+    Schedule existingEmployeeSchedule =
         scheduleRepository
             .findById(scheduleId)
             .orElseThrow(
                 () -> new ScheduleNotFoundException(SCHEDULE_NOT_FOUND_EXCEPTION + scheduleId));
 
-    updatedExistingEmployeeSchedule(updatedSchedule, existingEmployeeScheduleToUpdate);
+    Schedule newlyUpdatedSchedule =
+        updateExistingEmployeeSchedule(updatedSchedule, existingEmployeeSchedule);
 
-    scheduleValidator.validateSchedule(updatedSchedule);
+    scheduleValidator.validateSchedule(newlyUpdatedSchedule);
 
-    return scheduleRepository.save(updatedSchedule);
+    return scheduleRepository.save(newlyUpdatedSchedule);
   }
 
   @Override
   public Schedule addShiftToSchedule(Long employeeId, ShiftRequest approvedShiftRequest) {
 
-    validateApprovedShiftRequest(approvedShiftRequest);
+    validateShiftRequest(approvedShiftRequest);
 
     Optional<Schedule> scheduleInApprovedShiftCalenderWeek =
         getScheduleForApprovedShiftCalendarWeek(employeeId, approvedShiftRequest);
@@ -61,8 +62,29 @@ public class ScheduleServiceImpl implements ScheduleService {
           approvedShiftRequest, scheduleInApprovedShiftCalenderWeek);
 
     } else {
+      Schedule schedule = createNewScheduleForApprovedShift(employeeId, approvedShiftRequest);
+
+      return scheduleRepository.save(schedule);
+    }
+  }
+
+  @Override
+  public Schedule addApprovedVacationRequestToSchedule(
+      Long employeeId, VacationRequest approvedVacationRequest) {
+
+    validateVacationRequest(approvedVacationRequest);
+
+    Optional<Schedule> scheduleInApprovedVacationCalenderWeek =
+        getScheduleForApprovedVacationCalendarWeek(employeeId, approvedVacationRequest);
+
+    if (scheduleInApprovedVacationCalenderWeek.isPresent()) {
+
+      return addNewVacationEntryToExistingSchedule(
+          approvedVacationRequest, scheduleInApprovedVacationCalenderWeek);
+
+    } else {
       Schedule schedule =
-          createNewScheduleForApprovedVacationCalendarWeek(employeeId, approvedShiftRequest);
+          createNewScheduleForApprovedVacationRequest(employeeId, approvedVacationRequest);
 
       return scheduleRepository.save(schedule);
     }
@@ -80,28 +102,6 @@ public class ScheduleServiceImpl implements ScheduleService {
   }
 
   @Override
-  public Schedule addApprovedVacationRequestToSchedule(
-      Long employeeId, VacationRequest approvedVacationRequest) {
-
-    validateApprovedVacationRequest(approvedVacationRequest);
-
-    Optional<Schedule> scheduleInApprovedVacationCalenderWeek =
-        getScheduleForApprovedVacationCalendarWeek(employeeId, approvedVacationRequest);
-
-    if (scheduleInApprovedVacationCalenderWeek.isPresent()) {
-
-      return addNewVacationEntryToExistingSchedule(
-          approvedVacationRequest, scheduleInApprovedVacationCalenderWeek);
-
-    } else {
-      Schedule schedule =
-          createNewScheduleForApprovedVacationCalendarWeek(employeeId, approvedVacationRequest);
-
-      return scheduleRepository.save(schedule);
-    }
-  }
-
-  @Override
   public void deleteSchedule(Long employeeId) {
     if (!scheduleRepository.existsById(employeeId)) {
       throw new ScheduleNotFoundException(SCHEDULE_NOT_FOUND_EXCEPTION + employeeId);
@@ -109,13 +109,15 @@ public class ScheduleServiceImpl implements ScheduleService {
     scheduleRepository.deleteById(employeeId);
   }
 
-  private void updatedExistingEmployeeSchedule(
+  // Helper methods
+  private Schedule updateExistingEmployeeSchedule(
       Schedule updatedSchedule, Schedule existingSchedule) {
     existingSchedule.setStartDate(updatedSchedule.getStartDate());
     existingSchedule.setEndDate(updatedSchedule.getEndDate());
     existingSchedule.setShifts(updatedSchedule.getShifts());
     existingSchedule.setVacations(updatedSchedule.getVacations());
     existingSchedule.setTotalWorkingHours(updatedSchedule.getTotalWorkingHours());
+    return existingSchedule;
   }
 
   private LocalDateTime determineShiftEndDate(ShiftRequest approvedShiftRequest) {
@@ -124,7 +126,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         .plusHours(approvedShiftRequest.getShiftLengthInHours());
   }
 
-  private void validateApprovedVacationRequest(VacationRequest approvedVacationRequest) {
+  private void validateVacationRequest(VacationRequest approvedVacationRequest) {
     if (!VacationRequestStatus.APPROVED.equals(approvedVacationRequest.getStatus())) {
       throw new InvalidScheduleException(
           "Invalid schedule operation. Only approved vacation requests can be added to the schedule.");
@@ -147,7 +149,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
   }
 
-  private Schedule createNewScheduleForApprovedVacationCalendarWeek(
+  private Schedule createNewScheduleForApprovedVacationRequest(
       Long employeeId, VacationRequest approvedVacationRequest) {
 
     List<VacationEntry> vacationEntries = new ArrayList<>();
@@ -176,7 +178,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         employeeId, startOfVacationCalendarWeek, endOfVacationCalendarWeek);
   }
 
-  private static void validateApprovedShiftRequest(ShiftRequest approvedShiftRequest) {
+  private void validateShiftRequest(ShiftRequest approvedShiftRequest) {
     if (!ShiftRequestStatus.APPROVED.equals(approvedShiftRequest.getStatus())) {
       throw new InvalidScheduleException(
           "Invalid schedule operation. Only approved shifts can be added to the schedule.");
@@ -206,7 +208,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         employeeId, startOfShiftCalendarWeek, endOfShiftCalendarWeek);
   }
 
-  private Schedule createNewScheduleForApprovedVacationCalendarWeek(
+  private Schedule createNewScheduleForApprovedShift(
       Long employeeId, ShiftRequest approvedShiftRequest) {
     List<ShiftEntry> shiftEntries = new ArrayList<>();
 
