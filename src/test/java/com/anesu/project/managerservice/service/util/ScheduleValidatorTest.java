@@ -2,7 +2,6 @@ package com.anesu.project.managerservice.service.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
 
 import com.anesu.project.managerservice.entity.schedule.Schedule;
 import com.anesu.project.managerservice.entity.shift.ShiftEntry;
@@ -109,13 +108,11 @@ public class ScheduleValidatorTest {
     assertEquals(invalidScheduleException.getMessage(), "Shift exceeds maximum working hours.");
   }
 
-
   @Test
   void validateWeeklyWorkingHours_shouldThrowExceptionWhenWorkingHoursHaveBeenExceeded() {
     // Given
 
-    Schedule schedule =
-        providedSchedule(START_DATE, END_DATE, givenMultipleShiftEntries(), null);
+    Schedule schedule = providedSchedule(START_DATE, END_DATE, givenMultipleShiftEntries(), null);
 
     // When
     InvalidScheduleException invalidScheduleException =
@@ -123,7 +120,8 @@ public class ScheduleValidatorTest {
 
     // Then
 
-    assertEquals(invalidScheduleException.getMessage(), "Weekly working hours exceed maximum limit.");
+    assertEquals(
+        invalidScheduleException.getMessage(), "Weekly working hours exceed maximum limit.");
   }
 
   private Schedule providedSchedule(
@@ -155,5 +153,4 @@ public class ScheduleValidatorTest {
 
     return shiftEntries;
   }
-
 }

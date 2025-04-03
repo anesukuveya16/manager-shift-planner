@@ -70,7 +70,11 @@ public class VacationRequestServiceImpl implements VacationRequestService {
   @Override
   public List<VacationRequest> getTeamCalendar(
       Long officeLocationId, LocalDateTime startDate, LocalDateTime endDate) {
-    return List.of();
+    return vacationRequestRepository.findByOfficeLocationAndStatusAndDateRange(
+        officeLocationId,
+        startDate,
+        endDate,
+        List.of(VacationRequestStatus.PENDING, VacationRequestStatus.APPROVED));
   }
 
   @Override

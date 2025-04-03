@@ -25,4 +25,10 @@ public interface VacationRequestRepository extends JpaRepository<VacationRequest
       @Param("employeeId") Long employeeId,
       @Param("startOfYear") LocalDateTime startDate,
       @Param("endOfYear") LocalDateTime endDate);
+
+  List<VacationRequest> findByOfficeLocationAndStatusAndDateRange(
+      Long officeLocationId,
+      LocalDateTime startDate,
+      LocalDateTime endDate,
+      List<VacationRequestStatus> pending);
 }

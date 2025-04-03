@@ -1,6 +1,5 @@
 package com.anesu.project.managerservice.service;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -9,15 +8,10 @@ import com.anesu.project.managerservice.entity.vacation.VacationRequest;
 import com.anesu.project.managerservice.entity.vacation.VacationRequestStatus;
 import com.anesu.project.managerservice.model.ScheduleService;
 import com.anesu.project.managerservice.model.repository.VacationRequestRepository;
-import com.anesu.project.managerservice.service.exception.InvalidVacationRequestException;
 import com.anesu.project.managerservice.service.exception.VacationRequestNotFoundException;
 import com.anesu.project.managerservice.service.util.VacationRequestValidator;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,15 +38,11 @@ public class VacationRequestServiceImplTest {
   void approveVacationRequest_AndChangeStatusToApproved_AfterValidationHasPassed() {
 
     // Given
-    Long vacationRequestId = 1L;
-    VacationRequest vacationRequest = new VacationRequest();
-    vacationRequest.setId(vacationRequestId);
-    VacationRequestStatus status = VacationRequestStatus.PENDING;
-    vacationRequest.setStartDate(LocalDateTime.now());
-    vacationRequest.setEndDate(LocalDateTime.now().plusDays(10));
-    vacationRequest.setOfficeLocationId(vacationRequest.getOfficeLocationId());
 
-    when(vacationRequestRepositoryMock.findByIdAndStatus(vacationRequestId, status))
+    VacationRequest vacationRequest = givenVacationRequest();
+
+    when(vacationRequestRepositoryMock.findByIdAndStatus(
+            vacationRequest.getId(), VacationRequestStatus.PENDING))
         .thenReturn(Optional.of(vacationRequest));
     when(vacationRequestRepositoryMock.save(any(VacationRequest.class)))
         .thenReturn(vacationRequest);
@@ -74,9 +64,11 @@ public class VacationRequestServiceImplTest {
     // Given
     Long vacationRequestId = 10L;
     String rejectionReason = "Required";
+
     VacationRequest vacationRequest = new VacationRequest();
     vacationRequest.setId(vacationRequestId);
     vacationRequest.setStatus(VacationRequestStatus.PENDING);
+
     when(vacationRequestRepositoryMock.findByIdAndStatus(
             vacationRequestId, vacationRequest.getStatus()))
         .thenReturn(Optional.of(vacationRequest));
@@ -118,6 +110,7 @@ public class VacationRequestServiceImplTest {
 
     Long employeeId = 1L;
     VacationRequest vacationRequest = new VacationRequest();
+
     when(vacationRequestRepositoryMock.findByEmployeeId(employeeId))
         .thenReturn(List.of(vacationRequest));
 
@@ -133,20 +126,121 @@ public class VacationRequestServiceImplTest {
   void shouldThrowExceptionWhenVacationRequestIsNotFoundByIdAndStatus() {
 
     // Given
-    Long vacationRequestId = 10L;
-    VacationRequest vacationRequest = new VacationRequest();
-    vacationRequest.setId(vacationRequestId);
-    VacationRequestStatus status = VacationRequestStatus.PENDING;
-    when(vacationRequestRepositoryMock.findByIdAndStatus(vacationRequestId, status))
+
+    VacationRequest vacationRequest = givenVacationRequest();
+
+    when(vacationRequestRepositoryMock.findByIdAndStatus(
+            vacationRequest.getId(), VacationRequestStatus.PENDING))
         .thenReturn(Optional.empty());
 
     // When
     assertThrows(
         VacationRequestNotFoundException.class,
-        () -> cut.getVacationRequestByIdAndStatus(vacationRequest.getId(), status));
+        () ->
+            cut.getVacationRequestByIdAndStatus(
+                vacationRequest.getId(), VacationRequestStatus.PENDING));
 
     // Then
-    verify(vacationRequestRepositoryMock, times(1)).findByIdAndStatus(vacationRequestId, status);
+    verify(vacationRequestRepositoryMock, times(1))
+        .findByIdAndStatus(vacationRequest.getId(), VacationRequestStatus.PENDING);
     verifyNoMoreInteractions(vacationRequestRepositoryMock);
+  }
+
+  @Test
+  void shouldSuccessfullyRetrieveGivenEmployeeVacationRequests_ByIdAndDateRange() {
+
+    // Given
+
+    VacationRequest vacationRequest = givenVacationRequest();
+
+    when(vacationRequestRepositoryMock.findByEmployeeIdAndDateRange(
+            vacationRequest.getEmployeeId(),
+            vacationRequest.getStartDate(),
+            vacationRequest.getEndDate()))
+        .thenReturn(List.of(vacationRequest));
+
+    // When
+    List<VacationRequest> vacationRequests =
+        cut.getVacationByIdAndDateRange(
+            vacationRequest.getEmployeeId(),
+            vacationRequest.getStartDate(),
+            vacationRequest.getEndDate());
+
+    // Then
+    assertNotNull(vacationRequests);
+    assertEquals(1, vacationRequests.size());
+
+    verify(vacationRequestRepositoryMock, times(1))
+        .findByEmployeeIdAndDateRange(
+            vacationRequest.getEmployeeId(),
+            vacationRequest.getStartDate(),
+            vacationRequest.getEndDate());
+  }
+
+  @Test
+  void shouldSuccessfullyRetrieve_TeamVacationRequests() {
+    // Given
+
+    List<VacationRequest> vacationRequests = approvedVacationRequests();
+
+    VacationRequest submittedVacationRequest = givenVacationRequest();
+    when(vacationRequestRepositoryMock.findByOfficeLocationAndStatusAndDateRange(
+            submittedVacationRequest.getOfficeLocationId(),
+            submittedVacationRequest.getStartDate(),
+            submittedVacationRequest.getEndDate(),
+            List.of(VacationRequestStatus.PENDING, VacationRequestStatus.APPROVED)))
+        .thenReturn(List.of(submittedVacationRequest));
+
+    // When
+    List<VacationRequest> currentTeamCalendar =
+        cut.getTeamCalendar(
+            submittedVacationRequest.getOfficeLocationId(),
+            submittedVacationRequest.getStartDate(),
+            submittedVacationRequest.getEndDate());
+
+    // Then
+    assertNotNull(currentTeamCalendar);
+    assertEquals(1, currentTeamCalendar.size());
+
+    verify(vacationRequestRepositoryMock, times(1))
+        .findByOfficeLocationAndStatusAndDateRange(
+            submittedVacationRequest.getOfficeLocationId(),
+            submittedVacationRequest.getStartDate(),
+            submittedVacationRequest.getEndDate(),
+            List.of(VacationRequestStatus.PENDING, VacationRequestStatus.APPROVED));
+  }
+
+  private VacationRequest givenVacationRequest() {
+    VacationRequest vacationRequest = new VacationRequest();
+    vacationRequest.setId(1L);
+    vacationRequest.setEmployeeId(25L);
+    vacationRequest.setOfficeLocationId(250L);
+    vacationRequest.setStartDate(LocalDateTime.now());
+    vacationRequest.setEndDate(LocalDateTime.now().plusDays(8));
+    vacationRequest.setStatus(VacationRequestStatus.PENDING);
+    return vacationRequest;
+  }
+
+  private ArrayList<VacationRequest> approvedVacationRequests() {
+    return new ArrayList<>(
+        Arrays.asList(
+            new VacationRequest() {
+              {
+                setEmployeeId(3L);
+                setOfficeLocationId(250L);
+                setStartDate(LocalDateTime.now());
+                setEndDate(LocalDateTime.now().plusDays(8));
+                setStatus(VacationRequestStatus.APPROVED);
+              }
+            },
+            new VacationRequest() {
+              {
+                setEmployeeId(2L);
+                setOfficeLocationId(250L);
+                setStartDate(LocalDateTime.now());
+                setEndDate(LocalDateTime.now().plusDays(10));
+                setStatus(VacationRequestStatus.APPROVED);
+              }
+            }));
   }
 }
