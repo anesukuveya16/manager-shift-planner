@@ -29,6 +29,6 @@ public class VacationRequest {
   private String rejectionReason;
 
   @ManyToOne
-  @JoinColumn(name = "approved_by_manager_id")
-  private Manager approvedByManager;
+  @JoinColumn(name = "manager_id")
+  private Manager manager;
 }

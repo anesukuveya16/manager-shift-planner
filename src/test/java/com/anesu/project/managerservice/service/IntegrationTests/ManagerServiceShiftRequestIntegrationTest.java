@@ -1,0 +1,145 @@
+package com.anesu.project.managerservice.service.IntegrationTests;
+
+import static com.anesu.project.managerservice.service.IntegrationTests.ManagerServiceTestRestEndpoints.*;
+import static org.hamcrest.Matchers.equalTo;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class ManagerServiceShiftRequestIntegrationTest {
+
+  @LocalServerPort private int port;
+
+  @BeforeEach
+  void setUp() {
+    RestAssured.port = port;
+  }
+
+  @Test
+  void shouldSuccessfullySendShiftRequestToEmployee() {
+    Long employeeId = 100L;
+
+    String shiftRequestBody =
+        """
+          {
+          "shiftDate": "2025-06-20T10:00:00",
+          "shiftLengthInHours": 8,
+          "shiftType": "MORNING_SHIFT"
+        }
+    """;
+
+    RestAssured.given()
+        .contentType(ContentType.JSON)
+        .body(shiftRequestBody)
+        .when()
+        .post(CREATE_SHIFT_REQUEST, employeeId)
+        .then()
+        .statusCode(200)
+        .body("status", equalTo("PENDING"))
+        .body("shiftType", equalTo("MORNING_SHIFT"))
+        .body("shiftLengthInHours", equalTo(8));
+  }
+
+  @Test
+  void shouldApprovePendingShiftRequestFromEmployee() {
+    Long employeeId = 1L;
+
+    String shiftRequestBody =
+        """
+              {
+              "shiftDate": "2025-10-20T06:00:00",
+              "shiftLengthInHours": 8,
+              "shiftType": "MORNING_SHIFT"
+            }
+        """;
+
+    Integer shiftRequestId =
+        RestAssured.given()
+            .contentType(ContentType.JSON)
+            .body(shiftRequestBody)
+            .when()
+            .post(CREATE_SHIFT_REQUEST, employeeId)
+            .then()
+            .statusCode(200)
+            .body("status", equalTo("PENDING"))
+            .body("shiftType", equalTo("MORNING_SHIFT"))
+            .body("shiftLengthInHours", equalTo(8))
+            .extract()
+            .path("id");
+
+    String approvedShiftRequestBody =
+        """
+             {
+             "shiftDate": "2025-10-20T06:00:00",
+             "shiftLengthInHours": 8,
+             "shiftType": "MORNING_SHIFT",
+             "shiftRequestStatus": "APPROVED"
+           }
+       """;
+
+    RestAssured.given()
+        .contentType(ContentType.JSON)
+        .body(approvedShiftRequestBody)
+        .when()
+        .put(APPROVE_SHIFT_REQUEST, employeeId, shiftRequestId)
+        .then()
+        .statusCode(200)
+        .body("status", equalTo("APPROVED"))
+        .body("shiftType", equalTo("MORNING_SHIFT"))
+        .body("shiftLengthInHours", equalTo(8));
+  }
+
+  @Test
+  void shouldRejectPendingShiftRequestFromEmployee() {
+    Long employeeId = 100L;
+
+    String shiftRequestBody =
+        """
+                  {
+                  "shiftDate": "2025-10-20T15:00:00",
+                  "shiftLengthInHours": 6,
+                  "shiftType": "AFTERNOON_SHIFT"
+                }
+            """;
+
+    Integer shiftRequestId =
+        RestAssured.given()
+            .contentType(ContentType.JSON)
+            .body(shiftRequestBody)
+            .when()
+            .post(CREATE_SHIFT_REQUEST, employeeId)
+            .then()
+            .statusCode(200)
+            .body("status", equalTo("PENDING"))
+            .body("shiftType", equalTo("AFTERNOON_SHIFT"))
+            .body("shiftLengthInHours", equalTo(6))
+            .extract()
+            .path("id");
+
+    String declineShiftRequestBody =
+        """
+                  {
+                  "shiftDate": "2025-10-20T15:00:00",
+                  "shiftLengthInHours": 6,
+                  "shiftType": "AFTERNOON_SHIFT",
+                  "shiftRequestStatus": "REJECTED",
+                  "rejectionReason": "Too many employees in 1 shift."
+                }
+            """;
+
+    RestAssured.given()
+        .contentType(ContentType.JSON)
+        .body(declineShiftRequestBody)
+        .when()
+        .put(DECLINE_SHIFT_REQUEST, shiftRequestId)
+        .then()
+        .statusCode(200)
+        .body("status", equalTo("REJECTED"));
+  }
+
+}

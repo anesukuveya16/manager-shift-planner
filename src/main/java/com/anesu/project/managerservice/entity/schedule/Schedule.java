@@ -32,7 +32,8 @@ public class Schedule {
   private ScheduleStatus status;
   private String rejectionReason;
 
-  @ElementCollection List<ShiftEntry> shifts;
+  @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  List<ShiftEntry> shifts;
 
   @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   @JoinColumn(name = "schedule_id")

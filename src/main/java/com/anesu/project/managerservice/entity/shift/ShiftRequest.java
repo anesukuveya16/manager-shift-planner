@@ -1,6 +1,5 @@
 package com.anesu.project.managerservice.entity.shift;
 
-import com.anesu.project.managerservice.entity.manager.Manager;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
@@ -28,9 +27,6 @@ public class ShiftRequest {
 
   private Long shiftLengthInHours;
 
+  @Enumerated(EnumType.STRING)
   private ShiftType shiftType;
-
-  @ManyToOne
-  @JoinColumn(name = "approved_by_manager_id")
-  private Manager approvedByManager;
 }

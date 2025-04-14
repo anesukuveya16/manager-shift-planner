@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/manager")
+@RequestMapping("/api/manager")
 public class ManagerController {
 
   private final ScheduleServiceImpl scheduleService;
@@ -38,18 +38,23 @@ public class ManagerController {
   }
 
   // Schedule Endpoints
-  @PutMapping("/schedules/{scheduleId}")
+  @PostMapping(ManagerServiceRestEndpoints.CREATE_SCHEDULE)
+  public Schedule createSchedule(@RequestBody Schedule schedule) {
+    return scheduleService.createSchedule(schedule);
+  }
+
+  @PutMapping(ManagerServiceRestEndpoints.UPDATE_SCHEDULE)
   public Schedule updateEmployeeSchedule(
       @PathVariable Long scheduleId, @RequestBody Schedule updatedSchedule) {
     return scheduleService.updateEmployeeSchedule(scheduleId, updatedSchedule);
   }
 
-  @GetMapping("/schedules/{scheduleId}")
+  @GetMapping(ManagerServiceRestEndpoints.GET_SCHEDULE_BY_ID)
   public Optional<Schedule> getScheduleById(@PathVariable Long scheduleId) {
     return scheduleService.getScheduleById(scheduleId);
   }
 
-  @GetMapping("/schedules/{scheduleId}/range")
+  @GetMapping(ManagerServiceRestEndpoints.GET_SCHEDULES_IN_RANGE)
   public Optional<List<Schedule>> getAllEmployeeSchedulesWithinGivenDateRange(
       @PathVariable Long scheduleId,
       @RequestParam LocalDateTime startDate,
@@ -58,60 +63,62 @@ public class ManagerController {
         scheduleId, startDate, endDate);
   }
 
-  @DeleteMapping("/schedules/{employeeId}")
+  @DeleteMapping(ManagerServiceRestEndpoints.DELETE_SCHEDULE)
   public void deleteSchedule(@PathVariable Long employeeId) {
     scheduleService.deleteSchedule(employeeId);
   }
 
   // Shift Request Endpoints
-  @PostMapping("/employees/{employeeId}/shifts")
+  @PostMapping(ManagerServiceRestEndpoints.CREATE_SHIFT_REQUEST)
   public ShiftRequest sendShiftRequestToEmployee(
       @PathVariable Long employeeId, @RequestBody ShiftRequest shiftRequest) {
     return shiftRequestService.sendShiftRequestToEmployee(employeeId, shiftRequest);
   }
 
-  @PutMapping("/employees/{employeeId}/shifts/{shiftRequestId}/approve")
+  @PutMapping(ManagerServiceRestEndpoints.APPROVE_SHIFT_REQUEST)
   public ShiftRequest approveShiftRequest(
-      @PathVariable Long employeeId, @PathVariable Long shiftRequestId) {
+      @PathVariable Long employeeId,
+      @PathVariable Long shiftRequestId,
+      @RequestBody ShiftRequest approvedShiftRequest) {
     return shiftRequestService.approveShiftRequest(employeeId, shiftRequestId);
   }
 
-  @PutMapping("/shifts/{shiftRequestId}/decline")
+  @PutMapping(ManagerServiceRestEndpoints.DECLINE_SHIFT_REQUEST)
   public ShiftRequest declineShiftRequest(
-      @PathVariable Long shiftRequestId, @RequestParam String rejectionReason) {
+      @PathVariable Long shiftRequestId, @RequestBody String rejectionReason) {
     return shiftRequestService.declineShiftRequest(shiftRequestId, rejectionReason);
   }
 
-  @GetMapping("/employees/{employeeId}/shifts")
+  @GetMapping(ManagerServiceRestEndpoints.GET_SHIFT_REQUEST_BY_EMPLOYEE_ID)
   public Optional<ShiftRequest> getShiftRequestByEmployeeId(@PathVariable Long employeeId) {
     return shiftRequestService.getShiftRequestByEmployeeId(employeeId);
   }
 
-  @GetMapping("/shifts/range")
+  @GetMapping(ManagerServiceRestEndpoints.GET_SHIFT_REQUESTS_IN_RANGE)
   public List<ShiftRequest> getShiftRequestByDateRange(
       @RequestParam LocalDateTime startDate, @RequestParam LocalDateTime endDate) {
     return shiftRequestService.getShiftRequestByDateRange(startDate, endDate);
   }
 
   // Vacation Request Endpoints
-  @PutMapping("/vacations/{vacationRequestId}/approve")
+  @PutMapping(ManagerServiceRestEndpoints.APPROVE_VACATION_REQUEST)
   public VacationRequest approveVacationRequest(
       @PathVariable Long vacationRequestId, @RequestParam VacationRequestStatus status) {
     return vacationRequestService.approveVacationRequest(vacationRequestId, status);
   }
 
-  @PutMapping("/vacations/{vacationRequestId}/decline")
+  @PutMapping(ManagerServiceRestEndpoints.DECLINE_VACATION_REQUEST)
   public VacationRequest declineVacationRequest(
       @PathVariable Long vacationRequestId, @RequestParam String rejectionReason) {
     return vacationRequestService.declineVacationRequest(vacationRequestId, rejectionReason);
   }
 
-  @GetMapping("/employees/{employeeId}/vacations")
+  @GetMapping(ManagerServiceRestEndpoints.GET_VACATIONS_BY_EMPLOYEE_ID)
   public List<VacationRequest> getVacationRequestsByEmployeeId(@PathVariable Long employeeId) {
     return vacationRequestService.getVacationRequestsByEmployeeId(employeeId);
   }
 
-  @GetMapping("/employees/{employeeId}/vacations/range")
+  @GetMapping(ManagerServiceRestEndpoints.GET_EMPLOYEE_VACATIONS_IN_RANGE)
   public List<VacationRequest> getVacationByIdAndDateRange(
       @PathVariable Long employeeId,
       @RequestParam LocalDateTime startDate,
@@ -119,7 +126,7 @@ public class ManagerController {
     return vacationRequestService.getVacationByIdAndDateRange(employeeId, startDate, endDate);
   }
 
-  @GetMapping("/offices/{officeLocationId}/vacations")
+  @GetMapping(ManagerServiceRestEndpoints.GET_TEAM_CALENDAR)
   public List<VacationRequest> getTeamCalendar(
       @PathVariable Long officeLocationId,
       @RequestParam LocalDateTime startDate,

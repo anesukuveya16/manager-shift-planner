@@ -1,4 +1,4 @@
-package com.anesu.project.managerservice.service;
+package com.anesu.project.managerservice.service.UnitTests;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -8,6 +8,7 @@ import com.anesu.project.managerservice.entity.shift.ShiftRequestStatus;
 import com.anesu.project.managerservice.entity.shift.ShiftType;
 import com.anesu.project.managerservice.model.ScheduleService;
 import com.anesu.project.managerservice.model.repository.ShiftRequestRepository;
+import com.anesu.project.managerservice.service.ShiftRequestServiceImpl;
 import com.anesu.project.managerservice.service.exception.ShiftRequestNotFoundException;
 import com.anesu.project.managerservice.service.exception.ShiftValidationException;
 import com.anesu.project.managerservice.service.util.ShiftRequestValidator;

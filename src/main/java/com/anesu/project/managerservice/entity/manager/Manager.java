@@ -27,7 +27,7 @@ public class Manager {
   private LocalDate birthDate;
 
   @OneToMany(
-      mappedBy = "approvedByManager",
+      mappedBy = "manager",
       cascade = CascadeType.ALL,
       fetch = FetchType.LAZY // retrieves all shifts that are being handled by managerId
       )

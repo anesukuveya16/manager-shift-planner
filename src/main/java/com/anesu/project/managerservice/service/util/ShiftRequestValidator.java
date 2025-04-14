@@ -1,6 +1,7 @@
 package com.anesu.project.managerservice.service.util;
 
 import com.anesu.project.managerservice.entity.shift.ShiftRequest;
+import com.anesu.project.managerservice.entity.shift.ShiftRequestStatus;
 import com.anesu.project.managerservice.model.repository.ShiftRequestRepository;
 import com.anesu.project.managerservice.service.exception.ShiftValidationException;
 import java.util.Optional;
@@ -14,8 +15,8 @@ public class ShiftRequestValidator {
   public void validateShiftRequest(
       ShiftRequest shiftRequest, ShiftRequestRepository shiftRequestRepository) {
     Optional<ShiftRequest> shiftRequestOptional =
-        shiftRequestRepository.existsByIdAndShiftDate(
-            shiftRequest.getEmployeeId(), shiftRequest.getShiftDate());
+        shiftRequestRepository.findByEmployeeIdAndShiftDateAndStatus(
+            shiftRequest.getEmployeeId(), shiftRequest.getShiftDate(), ShiftRequestStatus.APPROVED);
 
     if (shiftRequestOptional.isPresent()) {
       ShiftRequest existingShift = shiftRequestOptional.get();

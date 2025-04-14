@@ -10,6 +10,14 @@ import java.util.Optional;
 public interface ScheduleService {
 
   /**
+   * Creates a new {@link Schedule} for an employee.
+   *
+   * @param schedule the {@link Schedule} to be created
+   * @return the created {@link Schedule}
+   */
+  Schedule createSchedule(Schedule schedule);
+
+  /**
    * Updates a specific employee's schedule based on the manager's decision.
    *
    * @param updatedSchedule the updated schedule information

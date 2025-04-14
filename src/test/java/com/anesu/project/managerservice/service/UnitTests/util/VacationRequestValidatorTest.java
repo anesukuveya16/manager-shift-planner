@@ -1,4 +1,4 @@
-package com.anesu.project.managerservice.service.util;
+package com.anesu.project.managerservice.service.UnitTests.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -9,6 +9,7 @@ import com.anesu.project.managerservice.entity.vacation.VacationRequest;
 import com.anesu.project.managerservice.entity.vacation.VacationRequestStatus;
 import com.anesu.project.managerservice.model.repository.VacationRequestRepository;
 import com.anesu.project.managerservice.service.exception.InvalidVacationRequestException;
+import com.anesu.project.managerservice.service.util.VacationRequestValidator;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;

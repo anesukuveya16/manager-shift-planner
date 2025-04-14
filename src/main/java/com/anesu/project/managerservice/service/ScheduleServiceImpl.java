@@ -33,6 +33,11 @@ public class ScheduleServiceImpl implements ScheduleService {
   }
 
   @Override
+  public Schedule createSchedule(Schedule schedule) {
+    return scheduleRepository.save(schedule);
+  }
+
+  @Override
   public Schedule updateEmployeeSchedule(Long scheduleId, Schedule updatedSchedule) {
     Schedule existingEmployeeSchedule =
         scheduleRepository
@@ -98,7 +103,7 @@ public class ScheduleServiceImpl implements ScheduleService {
   @Override
   public Optional<List<Schedule>> getAllEmployeeSchedulesWithinGivenDateRange(
       Long scheduleId, LocalDateTime startDate, LocalDateTime endDate) {
-    return scheduleRepository.findByAllEmployeeIdAndGivenDateRange(scheduleId, startDate, endDate);
+    return scheduleRepository.findByEmployeeIdAndDateRange(scheduleId, startDate, endDate);
   }
 
   @Override
@@ -174,7 +179,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     LocalDateTime endOfVacationCalendarWeek =
         approvedVacationRequest.getEndDate().with(DayOfWeek.SUNDAY);
 
-    return scheduleRepository.findByEmployeeIdAndCalendarWeek(
+    return scheduleRepository.findByEmployeeIdAndWeekRange(
         employeeId, startOfVacationCalendarWeek, endOfVacationCalendarWeek);
   }
 
@@ -204,7 +209,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     LocalDateTime endOfShiftCalendarWeek =
         approvedShiftRequest.getShiftDate().with(DayOfWeek.SUNDAY);
 
-    return scheduleRepository.findByEmployeeIdAndCalendarWeek(
+    return scheduleRepository.findByEmployeeIdAndWeekRange(
         employeeId, startOfShiftCalendarWeek, endOfShiftCalendarWeek);
   }
 

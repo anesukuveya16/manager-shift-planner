@@ -1,4 +1,4 @@
-package com.anesu.project.managerservice.service;
+package com.anesu.project.managerservice.service.UnitTests;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -8,6 +8,7 @@ import com.anesu.project.managerservice.entity.vacation.VacationRequest;
 import com.anesu.project.managerservice.entity.vacation.VacationRequestStatus;
 import com.anesu.project.managerservice.model.ScheduleService;
 import com.anesu.project.managerservice.model.repository.VacationRequestRepository;
+import com.anesu.project.managerservice.service.VacationRequestServiceImpl;
 import com.anesu.project.managerservice.service.exception.VacationRequestNotFoundException;
 import com.anesu.project.managerservice.service.util.VacationRequestValidator;
 import java.time.LocalDateTime;
@@ -184,11 +185,11 @@ public class VacationRequestServiceImplTest {
     List<VacationRequest> vacationRequests = approvedVacationRequests();
 
     VacationRequest submittedVacationRequest = givenVacationRequest();
-    when(vacationRequestRepositoryMock.findByOfficeLocationAndStatusAndDateRange(
+    when(vacationRequestRepositoryMock.findByOfficeLocationIdAndStatusAndDateRange(
             submittedVacationRequest.getOfficeLocationId(),
+            List.of(VacationRequestStatus.PENDING, VacationRequestStatus.APPROVED),
             submittedVacationRequest.getStartDate(),
-            submittedVacationRequest.getEndDate(),
-            List.of(VacationRequestStatus.PENDING, VacationRequestStatus.APPROVED)))
+            submittedVacationRequest.getEndDate()))
         .thenReturn(List.of(submittedVacationRequest));
 
     // When
@@ -203,11 +204,11 @@ public class VacationRequestServiceImplTest {
     assertEquals(1, currentTeamCalendar.size());
 
     verify(vacationRequestRepositoryMock, times(1))
-        .findByOfficeLocationAndStatusAndDateRange(
+        .findByOfficeLocationIdAndStatusAndDateRange(
             submittedVacationRequest.getOfficeLocationId(),
+            List.of(VacationRequestStatus.PENDING, VacationRequestStatus.APPROVED),
             submittedVacationRequest.getStartDate(),
-            submittedVacationRequest.getEndDate(),
-            List.of(VacationRequestStatus.PENDING, VacationRequestStatus.APPROVED));
+            submittedVacationRequest.getEndDate());
   }
 
   private VacationRequest givenVacationRequest() {

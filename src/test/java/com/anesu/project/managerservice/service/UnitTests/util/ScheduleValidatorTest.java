@@ -1,4 +1,4 @@
-package com.anesu.project.managerservice.service.util;
+package com.anesu.project.managerservice.service.UnitTests.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -8,6 +8,7 @@ import com.anesu.project.managerservice.entity.shift.ShiftEntry;
 import com.anesu.project.managerservice.entity.shift.ShiftType;
 import com.anesu.project.managerservice.entity.vacation.VacationEntry;
 import com.anesu.project.managerservice.service.exception.InvalidScheduleException;
+import com.anesu.project.managerservice.service.util.ScheduleValidator;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

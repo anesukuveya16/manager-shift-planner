@@ -13,22 +13,33 @@ public interface VacationRequestRepository extends JpaRepository<VacationRequest
 
   List<VacationRequest> findByEmployeeId(Long employeeId);
 
+  @Query(
+      "SELECT v FROM VacationRequest v WHERE v.employeeId = :employeeId "
+          + "AND v.startDate <= :endDate AND v.endDate >= :startDate")
   List<VacationRequest> findByEmployeeIdAndDateRange(
-      Long employeeId, LocalDateTime startDate, LocalDateTime endDate);
+      @Param("employeeId") Long employeeId,
+      @Param("startDate") LocalDateTime startDate,
+      @Param("endDate") LocalDateTime endDate);
 
   Optional<VacationRequest> findByIdAndStatus(Long vacationRequestId, VacationRequestStatus status);
 
   @Query(
-      "SELECT v FROM VacationRequest v WHERE v.employee.id = :employeeId "
+      "SELECT v FROM VacationRequest v WHERE v.employeeId = :employeeId "
           + "AND (v.startDate <= :endOfYear AND v.endDate >= :startOfYear)")
   List<VacationRequest> findByEmployeeIdAndOverlappingIntoNewYear(
       @Param("employeeId") Long employeeId,
       @Param("startOfYear") LocalDateTime startDate,
       @Param("endOfYear") LocalDateTime endDate);
 
-  List<VacationRequest> findByOfficeLocationAndStatusAndDateRange(
-      Long officeLocationId,
-      LocalDateTime startDate,
-      LocalDateTime endDate,
-      List<VacationRequestStatus> pending);
+  @Query(
+      "SELECT v FROM VacationRequest v "
+          + "WHERE v.officeLocationId = :officeLocationId "
+          + "AND v.status IN :status "
+          + "AND v.startDate >= :startDate "
+          + "AND v.endDate <= :endDate")
+  List<VacationRequest> findByOfficeLocationIdAndStatusAndDateRange(
+      @Param("officeLocationId") Long officeLocationId,
+      @Param("status") List<VacationRequestStatus> status,
+      @Param("startDate") LocalDateTime startDate,
+      @Param("endDate") LocalDateTime endDate);
 }

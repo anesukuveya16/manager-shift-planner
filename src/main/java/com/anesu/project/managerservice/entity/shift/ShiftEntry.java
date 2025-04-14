@@ -8,7 +8,6 @@ import lombok.*;
 @Builder
 @Getter
 @Setter
-@Embeddable
 @AllArgsConstructor
 @NoArgsConstructor
 public class ShiftEntry {

@@ -1,4 +1,4 @@
-package com.anesu.project.managerservice.service;
+package com.anesu.project.managerservice.service.UnitTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,6 +14,7 @@ import com.anesu.project.managerservice.entity.vacation.VacationEntry;
 import com.anesu.project.managerservice.entity.vacation.VacationRequest;
 import com.anesu.project.managerservice.entity.vacation.VacationRequestStatus;
 import com.anesu.project.managerservice.model.repository.ScheduleRepository;
+import com.anesu.project.managerservice.service.ScheduleServiceImpl;
 import com.anesu.project.managerservice.service.exception.ScheduleNotFoundException;
 import com.anesu.project.managerservice.service.util.ScheduleValidator;
 import java.time.LocalDate;

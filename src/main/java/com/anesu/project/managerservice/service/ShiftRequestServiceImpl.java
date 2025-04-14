@@ -90,6 +90,6 @@ public class ShiftRequestServiceImpl implements ShiftRequestService {
   @Override
   public List<ShiftRequest> getShiftRequestByDateRange(
       LocalDateTime startDate, LocalDateTime endDate) {
-    return shiftRequestRepository.findByDateRange(startDate, endDate);
+    return shiftRequestRepository.findByShiftDateBetween(startDate, endDate);
   }
 }
