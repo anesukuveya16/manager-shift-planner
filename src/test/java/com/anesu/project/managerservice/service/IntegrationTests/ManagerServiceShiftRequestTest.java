@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ManagerServiceShiftRequestIntegrationTest {
+class ManagerServiceShiftRequestTest {
 
   @LocalServerPort private int port;
 
@@ -22,7 +22,7 @@ class ManagerServiceShiftRequestIntegrationTest {
 
   @Test
   void shouldSuccessfullySendShiftRequestToEmployee() {
-    Long employeeId = 100L;
+    Long employeeId = 10L;
 
     String shiftRequestBody =
         """
@@ -96,7 +96,7 @@ class ManagerServiceShiftRequestIntegrationTest {
 
   @Test
   void shouldRejectPendingShiftRequestFromEmployee() {
-    Long employeeId = 100L;
+    Long employeeId = 105L;
 
     String shiftRequestBody =
         """
@@ -142,4 +142,51 @@ class ManagerServiceShiftRequestIntegrationTest {
         .body("status", equalTo("REJECTED"));
   }
 
+  @Test
+  void shouldSuccessfullyRetrieveShiftRequestByGivenEmployeeId() {
+    Long employeeId = 200L;
+
+    String shiftRequestBody =
+        """
+                  {
+                  "shiftDate": "2025-10-20T21:00:00",
+                  "shiftLengthInHours": 10,
+                  "shiftType": "NIGHT_SHIFT"
+                }
+            """;
+
+    RestAssured.given()
+        .contentType(ContentType.JSON)
+        .body(shiftRequestBody)
+        .when()
+        .post(CREATE_SHIFT_REQUEST, employeeId)
+        .then()
+        .statusCode(200)
+        .body("status", equalTo("PENDING"))
+        .body("shiftType", equalTo("NIGHT_SHIFT"))
+        .body("shiftLengthInHours", equalTo(10));
+
+    String requestedShiftRequestBody =
+        """
+                 {
+                 "shiftDate": "2025-10-20T21:00:00",
+                 "shiftLengthInHours": 10,
+                 "shiftType": "NIGHT_SHIFT"
+               }
+           """;
+
+    RestAssured.given()
+        .contentType(ContentType.JSON)
+        .body(requestedShiftRequestBody)
+        .when()
+        .get(GET_SHIFT_REQUEST_BY_EMPLOYEE_ID, employeeId)
+        .then()
+        .statusCode(200)
+        .body("status", equalTo("PENDING"))
+        .body("shiftType", equalTo("NIGHT_SHIFT"))
+        .body("shiftLengthInHours", equalTo(10));
+  }
+
+  // test: get employee shift requests in range
+  // test: get team calendar
 }

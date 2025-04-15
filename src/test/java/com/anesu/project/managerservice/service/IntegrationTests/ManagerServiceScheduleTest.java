@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ManagerServiceScheduleIntegrationTest {
+class ManagerServiceScheduleTest {
 
   @LocalServerPort private int port;
 
@@ -175,7 +175,7 @@ class ManagerServiceScheduleIntegrationTest {
         }
     """;
 
-    Integer employeeId =
+    Integer scheduleId =
         RestAssured.given()
             .contentType(ContentType.JSON)
             .body(existingScheduleRequestBody)
@@ -207,7 +207,7 @@ class ManagerServiceScheduleIntegrationTest {
         .contentType(ContentType.JSON)
         .body(deleteScheduleRequestBody)
         .when()
-        .delete(DELETE_SCHEDULE, employeeId)
+        .delete(DELETE_SCHEDULE, scheduleId)
         .then()
         .statusCode(200);
   }
