@@ -5,7 +5,6 @@ import com.anesu.project.managerservice.entity.shift.ShiftRequestStatus;
 import com.anesu.project.managerservice.service.exception.ShiftRequestNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 public interface ShiftRequestService {
 
@@ -43,7 +42,7 @@ public interface ShiftRequestService {
    * @param employeeId the ID of the employee whose shift request is being retrieved
    * @return the corresponding {@link ShiftRequest}, or {@code null} if not found
    */
-  Optional<ShiftRequest> getShiftRequestByEmployeeId(Long employeeId);
+  List<ShiftRequest> getShiftRequestByEmployeeId(Long employeeId);
 
   /**
    * Retrieves a list of shift requests for an employee based on their status.

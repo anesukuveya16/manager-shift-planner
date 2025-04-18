@@ -134,7 +134,7 @@ class ManagerServiceScheduleTest {
             .extract()
             .path("id");
 
-    String currentSchedule =
+    String updatedSchedule =
         """
        {
          "employeeId": 1,
@@ -149,7 +149,7 @@ class ManagerServiceScheduleTest {
 
     RestAssured.given()
         .contentType(ContentType.JSON)
-        .body(currentSchedule)
+        .body(updatedSchedule)
         .when()
         .get(GET_SCHEDULE_BY_ID, scheduleId)
         .then()
@@ -161,15 +161,16 @@ class ManagerServiceScheduleTest {
 
   @Test
   void shouldDeleteEmployeeScheduleSuccessfully() {
+
     String existingScheduleRequestBody =
         """
         {
-          "employeeId": 1,
-          "startDate": "2025-04-15T08:00:00",
-          "endDate": "2025-04-15T16:00:00",
+          "employeeId": 250,
+          "startDate": "2025-04-15T10:00:00",
+          "endDate": "2025-04-15T18:00:00",
           "status": "PENDING",
           "rejectionReason": null,
-          "totalWorkingHours": 20,
+          "totalWorkingHours": 10,
           "shifts": [],
           "vacations": []
         }
@@ -183,29 +184,15 @@ class ManagerServiceScheduleTest {
             .post(CREATE_SCHEDULE)
             .then()
             .statusCode(200)
+            .body("employeeId", equalTo(250))
             .body("status", equalTo("PENDING"))
             .body("shifts.size()", equalTo(0))
             .body("vacations.size()", equalTo(0))
             .extract()
             .path("id");
 
-    String deleteScheduleRequestBody =
-        """
-       {
-         "employeeId": 1,
-         "startDate": "2025-04-15T10:00:00",
-         "endDate": "2025-04-15T18:00:00",
-         "status": "PENDING",
-         "rejectionReason": null,
-         "totalWorkingHours": 20,
-         "shifts": [],
-         "vacations": []
-       }
-   """;
-
     RestAssured.given()
         .contentType(ContentType.JSON)
-        .body(deleteScheduleRequestBody)
         .when()
         .delete(DELETE_SCHEDULE, scheduleId)
         .then()

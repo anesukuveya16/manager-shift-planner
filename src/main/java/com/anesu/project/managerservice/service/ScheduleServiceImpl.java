@@ -107,11 +107,11 @@ public class ScheduleServiceImpl implements ScheduleService {
   }
 
   @Override
-  public void deleteSchedule(Long employeeId) {
-    if (!scheduleRepository.existsById(employeeId)) {
-      throw new ScheduleNotFoundException(SCHEDULE_NOT_FOUND_EXCEPTION + employeeId);
+  public void deleteSchedule(Long scheduleId) {
+    if (!scheduleRepository.existsById(scheduleId)) {
+      throw new ScheduleNotFoundException(SCHEDULE_NOT_FOUND_EXCEPTION + scheduleId);
     }
-    scheduleRepository.deleteById(employeeId);
+    scheduleRepository.deleteById(scheduleId);
   }
 
   // Helper methods

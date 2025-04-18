@@ -1,7 +1,7 @@
 package com.anesu.project.managerservice.service.IntegrationTests;
 
 import static com.anesu.project.managerservice.service.IntegrationTests.ManagerServiceTestRestEndpoints.*;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -146,7 +146,7 @@ class ManagerServiceShiftRequestTest {
   void shouldSuccessfullyRetrieveShiftRequestByGivenEmployeeId() {
     Long employeeId = 200L;
 
-    String shiftRequestBody =
+    String shiftRequestBodyOne =
         """
                   {
                   "shiftDate": "2025-10-20T21:00:00",
@@ -157,7 +157,7 @@ class ManagerServiceShiftRequestTest {
 
     RestAssured.given()
         .contentType(ContentType.JSON)
-        .body(shiftRequestBody)
+        .body(shiftRequestBodyOne)
         .when()
         .post(CREATE_SHIFT_REQUEST, employeeId)
         .then()
@@ -166,25 +166,35 @@ class ManagerServiceShiftRequestTest {
         .body("shiftType", equalTo("NIGHT_SHIFT"))
         .body("shiftLengthInHours", equalTo(10));
 
-    String requestedShiftRequestBody =
+    String shiftRequestBodyTwo =
         """
-                 {
-                 "shiftDate": "2025-10-20T21:00:00",
-                 "shiftLengthInHours": 10,
-                 "shiftType": "NIGHT_SHIFT"
-               }
-           """;
+                      {
+                      "shiftDate": "2025-10-24T15:00:00",
+                      "shiftLengthInHours": 6,
+                      "shiftType": "AFTERNOON_SHIFT"
+                    }
+                """;
 
     RestAssured.given()
         .contentType(ContentType.JSON)
-        .body(requestedShiftRequestBody)
+        .body(shiftRequestBodyTwo)
+        .when()
+        .post(CREATE_SHIFT_REQUEST, employeeId)
+        .then()
+        .statusCode(200)
+        .body("status", equalTo("PENDING"))
+        .body("shiftType", equalTo("AFTERNOON_SHIFT"))
+        .body("shiftLengthInHours", equalTo(6));
+
+    RestAssured.given()
+        .contentType(ContentType.JSON)
         .when()
         .get(GET_SHIFT_REQUEST_BY_EMPLOYEE_ID, employeeId)
         .then()
         .statusCode(200)
-        .body("status", equalTo("PENDING"))
-        .body("shiftType", equalTo("NIGHT_SHIFT"))
-        .body("shiftLengthInHours", equalTo(10));
+        .body("findAll { it.status == 'PENDING' }.size()", greaterThanOrEqualTo(2))
+        .body("findAll { it.shiftType == 'AFTERNOON_SHIFT' }.size()", greaterThanOrEqualTo(1))
+        .body("findAll { it.shiftType == 'NIGHT_SHIFT' }.size()", greaterThanOrEqualTo(1));
   }
 
   // test: get employee shift requests in range

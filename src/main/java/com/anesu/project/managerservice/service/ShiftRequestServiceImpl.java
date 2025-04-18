@@ -9,7 +9,6 @@ import com.anesu.project.managerservice.service.exception.ShiftRequestNotFoundEx
 import com.anesu.project.managerservice.service.util.ShiftRequestValidator;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -68,7 +67,7 @@ public class ShiftRequestServiceImpl implements ShiftRequestService {
   }
 
   @Override
-  public Optional<ShiftRequest> getShiftRequestByEmployeeId(Long employeeId) {
+  public List<ShiftRequest> getShiftRequestByEmployeeId(Long employeeId) {
     return shiftRequestRepository.findByEmployeeId(employeeId);
   }
 

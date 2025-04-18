@@ -10,15 +10,7 @@ import com.anesu.project.managerservice.service.VacationRequestServiceImpl;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/manager")
@@ -64,8 +56,8 @@ public class ManagerController {
   }
 
   @DeleteMapping(ManagerServiceRestEndpoints.DELETE_SCHEDULE)
-  public void deleteSchedule(@PathVariable Long employeeId) {
-    scheduleService.deleteSchedule(employeeId);
+  public void deleteSchedule(@PathVariable Long scheduleId) {
+    scheduleService.deleteSchedule(scheduleId);
   }
 
   // Shift Request Endpoints
@@ -90,7 +82,7 @@ public class ManagerController {
   }
 
   @GetMapping(ManagerServiceRestEndpoints.GET_SHIFT_REQUEST_BY_EMPLOYEE_ID)
-  public Optional<ShiftRequest> getShiftRequestByEmployeeId(@PathVariable Long employeeId) {
+  public List<ShiftRequest> getShiftRequestByEmployeeId(@PathVariable Long employeeId) {
     return shiftRequestService.getShiftRequestByEmployeeId(employeeId);
   }
 

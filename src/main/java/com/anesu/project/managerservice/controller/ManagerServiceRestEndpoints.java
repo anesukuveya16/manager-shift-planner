@@ -7,7 +7,7 @@ public class ManagerServiceRestEndpoints {
   public static final String UPDATE_SCHEDULE = "/schedules/{scheduleId}";
   public static final String GET_SCHEDULE_BY_ID = "/schedules/{scheduleId}";
   public static final String GET_SCHEDULES_IN_RANGE = "/schedules/{scheduleId}/range";
-  public static final String DELETE_SCHEDULE = "/schedules/{employeeId}";
+  public static final String DELETE_SCHEDULE = "/schedules/{scheduleId}";
 
   // Shift Request Endpoints
   public static final String CREATE_SHIFT_REQUEST = "/employees/{employeeId}/shifts";

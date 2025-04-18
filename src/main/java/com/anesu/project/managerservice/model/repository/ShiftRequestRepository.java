@@ -13,7 +13,7 @@ public interface ShiftRequestRepository extends JpaRepository<ShiftRequest, Long
   Optional<ShiftRequest> findByEmployeeIdAndShiftDateAndStatus(
       Long employeeId, LocalDateTime shiftDate, ShiftRequestStatus status);
 
-  Optional<ShiftRequest> findByEmployeeId(Long employeeId);
+  List<ShiftRequest> findByEmployeeId(Long employeeId);
 
   List<ShiftRequest> findByShiftDateBetween(LocalDateTime startDate, LocalDateTime endDate);
 
